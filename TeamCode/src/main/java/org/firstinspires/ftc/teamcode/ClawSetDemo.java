@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name="Motor Ramp Demo", group="Concept")
+@TeleOp(name="Claw Ramp Demo", group="Concept")
 public class ClawSetDemo extends LinearOpMode {
     double leftClawPos = 0.0;
     double rightClawPos = 0.0;
@@ -48,16 +48,16 @@ public class ClawSetDemo extends LinearOpMode {
             bButtonWasPressed = gamepad1.b;
 
             if(!upWasPressed && gamepad1.dpad_up) {
-                rightClawPos += 0.5;
+                leftClawPos += 0.5;
             }
             if(!downWasPressed && gamepad1.dpad_down) {
-                rightClawPos -= 0.5;
+                leftClawPos -= 0.5;
             }
             if(!leftWasPressed && gamepad1.dpad_left) {
-                rightClawPos -= 0.1;
+                leftClawPos -= 0.1;
             }
             if(!rightWasPressed && gamepad1.dpad_right) {
-                rightClawPos += 0.1;
+                leftClawPos += 0.1;
             }
             upWasPressed = gamepad1.dpad_up;
             downWasPressed = gamepad1.dpad_down;

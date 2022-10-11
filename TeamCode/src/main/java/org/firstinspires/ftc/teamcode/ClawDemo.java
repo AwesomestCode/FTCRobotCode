@@ -17,13 +17,13 @@ public class ClawDemo extends LinearOpMode {
 
         while(opModeIsActive()) {
             if(gamepad1.x) {
-                leftClaw.setPosition(-0.5);
-                rightClaw.setPosition(-0.5);
+                leftClaw.setPosition(0.4);
+                rightClaw.setPosition(0.6);
                 clawState = true;
             }
             if(gamepad1.b) {
-                leftClaw.setPosition(0.0);
-                rightClaw.setPosition(0.0);
+                leftClaw.setPosition(0.3);
+                rightClaw.setPosition(0.8);
                 clawState = false;
             }
             telemetry.addData("Claw opened state", clawState);

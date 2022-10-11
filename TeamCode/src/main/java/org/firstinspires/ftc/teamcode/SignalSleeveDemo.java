@@ -17,17 +17,17 @@ public class SignalSleeveDemo extends LinearOpMode {
 
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
-    double tagsize = (0.11289 / 2);
+    double tagsize = 0.02;
 
-    double fx = 1430;
-    double fy = 1430;
-    double cx = 480;
-    double cy = 620;
+    double fx = 822.317;
+    double fy = 822.317;
+    double cx = 319.495;
+    double cy = 242.502;
 
     int numFramesWithoutDetection = 0;
 
-    final float DECIMATION_HIGH = 3;
-    final float DECIMATION_LOW = 2;
+    final float DECIMATION_HIGH = 2;
+    final float DECIMATION_LOW = 1;
     final float THRESHOLD_HIGH_DECIMATION_RANGE_METERS = 1.0f;
     final int THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION = 4;
 
