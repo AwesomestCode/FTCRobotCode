@@ -3,49 +3,36 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Gamepad;
+import org.firstinspires.ftc.teamcode.subsystems.SlidePositionSetter;
 
 @TeleOp(name="Motor Position Demo", group="Concept")
 public class MotorPositionDemo extends LinearOpMode {
-    int multiplier = 10;
-    int position = 0;
-
     @Override
     public void runOpMode() throws InterruptedException {
-        DcMotor motor = hardwareMap.get(DcMotor.class, "frontLeft");
-        motor.setTargetPosition(0);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        boolean xButtonWasPressed = false;
-        boolean yButtonWasPressed = false;
-        boolean bButtonWasPressed = false;
-        boolean aButtonWasPressed = false;
+        int multiplier = 1;
+        SlidePositionSetter slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide"));
 
         waitForStart();
 
+        Gamepad oldGamepad1 = gamepad1;
+        Gamepad oldGamepad2 = gamepad2;
+
         while(opModeIsActive()) {
-            telemetry.addData("Position", position);
-            telemetry.addData("Multiplier", multiplier);
-            telemetry.addData("Encoder Position", motor.getCurrentPosition());
-            if(!yButtonWasPressed && gamepad1.y) {
-                multiplier *= 10;
+            if(!oldGamepad1.x && gamepad1.x) {
+                slideSystem.decrementPosition(100);
             }
-            if(!aButtonWasPressed && gamepad1.a) {
-                multiplier *= 0.1;
+            if(!oldGamepad1.b && gamepad1.b) {
+                slideSystem.incrementPosition(100);
             }
-            if(!xButtonWasPressed && gamepad1.x) {
-                position += multiplier;
-                motor.setPower(1.0);
+            if(!oldGamepad1.a && gamepad1.a) {
+                slideSystem.decrementPosition(10);
             }
-            if(!bButtonWasPressed && gamepad1.b) {
-                position -= multiplier;
-                motor.setPower(0.5);
+            if(!oldGamepad1.y && gamepad1.y) {
+                slideSystem.incrementPosition(10);
             }
-            yButtonWasPressed = gamepad1.y;
-            aButtonWasPressed = gamepad1.a;
-            xButtonWasPressed = gamepad1.x;
-            bButtonWasPressed = gamepad1.b;
-            telemetry.update();
-            motor.setTargetPosition(position);
-            sleep(100);
+            sleep(10);
         }
     }
 }

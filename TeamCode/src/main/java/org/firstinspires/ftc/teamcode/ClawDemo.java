@@ -1,11 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
+@Disabled
 @TeleOp(name="Claw Demo", group="Demo")
 public class ClawDemo extends LinearOpMode {
+
     @Override
     public void runOpMode() throws InterruptedException {
         Servo leftClaw = hardwareMap.get(Servo.class, "leftClaw");

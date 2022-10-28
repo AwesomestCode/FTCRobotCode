@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDrivetrainMixer;
 
 import java.util.List;
 
@@ -26,55 +27,14 @@ public class MecanumDrivetrainDemo extends LinearOpMode {
         DcMotorEx rearLeft = (DcMotorEx) hardwareMap.dcMotor.get("rearLeft");
         DcMotorEx rearRight = (DcMotorEx) hardwareMap.dcMotor.get("rearRight");
 
-        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        rearLeft.setDirection(DcMotorEx.Direction.REVERSE);
-
-        BNO055IMU imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-
-        imu.initialize(parameters);
-
-        double initialHeading = -imu.getAngularOrientation().firstAngle;
-
-        waitForStart();
-
-        if (isStopRequested()) return;
-
-        double totalCurrent = 0;
+        MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
 
         while (opModeIsActive()) {
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x;
             double rx = gamepad1.right_stick_x;
 
-            double botHeading = -imu.getAngularOrientation().firstAngle - initialHeading;
-
-            telemetry.addData("First Angle", imu.getAngularOrientation().firstAngle);
-            telemetry.addData("Second Angle", imu.getAngularOrientation().secondAngle);
-            telemetry.addData("Third Angle", imu.getAngularOrientation().thirdAngle);
-
-            double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
-            double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
-
-            double maxPower = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            telemetry.addData("Max Power", maxPower);
-
-            double frontLeftPower = (rotY + rotX + rx) / maxPower;
-            double frontRightPower = (rotY - rotX - rx) / maxPower;
-            double rearLeftPower = (rotY - rotX + rx) / maxPower;
-            double rearRightPower = (rotY + rotX - rx) / maxPower;
-
-            telemetry.addData("Front Left Power", frontLeftPower);
-            telemetry.addData("Front Right Power", frontRightPower);
-            telemetry.addData("Rear Left Power", rearLeftPower);
-            telemetry.addData("Rear Right Power", rearRightPower);
-
-            frontLeft.setPower(frontLeftPower);
-            frontRight.setPower(frontRightPower);
-            rearLeft.setPower(rearLeftPower);
-            rearRight.setPower(rearRightPower);
+            mixer.setMovement(y, x, rx);
 
             telemetry.addData("Front Left Amperage", frontLeft.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("Front Right Amperage", frontRight.getCurrent(CurrentUnit.AMPS));
@@ -82,8 +42,6 @@ public class MecanumDrivetrainDemo extends LinearOpMode {
             telemetry.addData("Rear Right Amperage", rearRight.getCurrent(CurrentUnit.AMPS));
 
             List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-
-
 
             for (LynxModule hub : allHubs) {
                 hub.setBulkCachingMode(LynxModule.BulkCachingMode.OFF);
