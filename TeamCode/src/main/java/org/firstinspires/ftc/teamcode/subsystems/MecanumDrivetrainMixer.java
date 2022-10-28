@@ -22,8 +22,17 @@ public class MecanumDrivetrainMixer {
         frontRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
+        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        backLeft.setDirection(DcMotorEx.Direction.REVERSE);
     }
 
+    private void updatePowers() {
+        frontLeft.setPower(frontLeftPower);
+        frontRight.setPower(frontRightPower);
+        backLeft.setPower(rearLeftPower);
+        backRight.setPower(rearRightPower);
+    }
     public void setMovement(double x, double y, double rotation, double heading) {
         double rotX = x * Math.cos(heading) - y * Math.sin(heading);
         double rotY = x * Math.sin(heading) + y * Math.cos(heading);
@@ -34,6 +43,8 @@ public class MecanumDrivetrainMixer {
         frontRightPower = (rotY - rotX - rotation) / maxPower;
         rearLeftPower = (rotY - rotX + rotation) / maxPower;
         rearRightPower = (rotY + rotX - rotation) / maxPower;
+
+        updatePowers();
     }
 
     public void setMovement(double x, double y, double rotation) {

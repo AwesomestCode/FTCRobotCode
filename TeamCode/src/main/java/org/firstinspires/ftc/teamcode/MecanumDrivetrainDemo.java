@@ -36,7 +36,7 @@ public class MecanumDrivetrainDemo extends LinearOpMode {
             double x = gamepad1.left_stick_x;
             double rx = gamepad1.right_stick_x;
 
-            mixer.setMovement(y, x, rx);
+            mixer.setMovement(x, y, rx);
 
             telemetry.addData("Front Left Amperage", frontLeft.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("Front Right Amperage", frontRight.getCurrent(CurrentUnit.AMPS));

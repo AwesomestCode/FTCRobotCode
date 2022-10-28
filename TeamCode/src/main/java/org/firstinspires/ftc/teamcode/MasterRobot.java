@@ -26,17 +26,17 @@ public class MasterRobot extends LinearOpMode {
             } catch (RobotCoreException e) {
                 e.printStackTrace();
             }
-            if (!oldGamepad1.x && newGamepad1.x) {
+            if (!oldGamepad1.x && newGamepad1.y) {
                 slideSystem.setPosition(4200);
+            }
+            if (!oldGamepad1.x && newGamepad1.x) {
+                slideSystem.setPosition(1000);
             }
             if (!oldGamepad1.b && newGamepad1.b) {
                 slideSystem.setPosition(3000);
             }
             if (!oldGamepad1.a && newGamepad1.a) {
                 slideSystem.setPosition(0);
-            }
-            if (!oldGamepad1.y && newGamepad1.y) {
-                slideSystem.setPosition(1000);
             }
             telemetry.addData("Target Position", slideSystem.getTargetPosition());
             telemetry.addData("Actual Position", slideSystem.getActualPosition());
