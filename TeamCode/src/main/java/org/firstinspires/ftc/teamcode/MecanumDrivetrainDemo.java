@@ -29,6 +29,8 @@ public class MecanumDrivetrainDemo extends LinearOpMode {
 
         MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
 
+        waitForStart();
+
         while (opModeIsActive()) {
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x;

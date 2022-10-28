@@ -11,12 +11,21 @@ public class SlidePositionSetter {
     private int position;
     private double speed;
 
-    public SlidePositionSetter(DcMotorEx slide) {
+    public SlidePositionSetter(DcMotorEx slide, boolean reversed) {
         this.slide = slide;
         this.position = 0;
         this.speed = 1.0;
         updatePosition();
         this.slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        if(reversed) {
+            this.slide.setDirection(DcMotor.Direction.REVERSE);
+        }
+        updatePower();
+    }
+
+    public SlidePositionSetter(DcMotorEx slide) {
+        this(slide, false);
     }
 
     private void updatePosition() {
