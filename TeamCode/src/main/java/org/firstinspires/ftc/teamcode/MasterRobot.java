@@ -17,17 +17,22 @@ import java.util.List;
 @TeleOp(name="Master Robot", group="Full Code")
 public class MasterRobot extends LinearOpMode {
 
-    SlidePositionSetter slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide"), true);
+    SlidePositionSetter slideSystem;
 
-    DcMotorEx frontLeft = (DcMotorEx) hardwareMap.dcMotor.get("frontLeft");
-    DcMotorEx frontRight = (DcMotorEx) hardwareMap.dcMotor.get("frontRight");
-    DcMotorEx rearLeft = (DcMotorEx) hardwareMap.dcMotor.get("rearLeft");
-    DcMotorEx rearRight = (DcMotorEx) hardwareMap.dcMotor.get("rearRight");
+    DcMotorEx frontLeft;
+    DcMotorEx frontRight;
+    DcMotorEx rearLeft;
+    DcMotorEx rearRight;
 
-    MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
+    MecanumDrivetrainMixer mixer;
     @Override
     public void runOpMode() throws InterruptedException {
-
+        frontLeft = (DcMotorEx) hardwareMap.dcMotor.get("frontLeft");
+        frontRight = (DcMotorEx) hardwareMap.dcMotor.get("frontRight");
+        rearLeft = (DcMotorEx) hardwareMap.dcMotor.get("rearLeft");
+        rearRight = (DcMotorEx) hardwareMap.dcMotor.get("rearRight");
+        mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
+        slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide"), true);
 
         waitForStart();
 
