@@ -62,6 +62,7 @@ public class FullDemo extends LinearOpMode {
         double totalCurrent = 0;
 
         while (opModeIsActive()) {
+            //IF THIS CODE ENDS UP IN PRODUCTION RAYMOND IS GOING TO BE VERY IRRITATED. THIS IS TESTING CODE THAT SHOULD **NEVER** BE USED AT A COMPETITION.
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x;
             double rx = gamepad1.right_stick_x;
