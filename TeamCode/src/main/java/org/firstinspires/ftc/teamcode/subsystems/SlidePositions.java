@@ -1,13 +1,16 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
+
+@Config
 public enum SlidePositions {
     TOP(4200),
-    MEDIUM(3000),
-    LOW(1000),
+    MEDIUM(2800),
+    LOW(1500),
     GROUND(0)
     ;
 
-    final int position;
+    int position;
 
     SlidePositions(int position) {
         this.position = position;
