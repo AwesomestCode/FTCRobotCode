@@ -2,50 +2,47 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Gamepad;
+import org.firstinspires.ftc.teamcode.subsystems.SlidePositionSetter;
 
 @TeleOp(name="Motor Position Demo", group="Concept")
 public class MotorPositionDemo extends LinearOpMode {
-    int multiplier = 10;
-    int position = 0;
-
     @Override
     public void runOpMode() throws InterruptedException {
-        DcMotor motor = hardwareMap.get(DcMotor.class, "frontLeft");
-        motor.setTargetPosition(0);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        boolean xButtonWasPressed = false;
-        boolean yButtonWasPressed = false;
-        boolean bButtonWasPressed = false;
-        boolean aButtonWasPressed = false;
+        // int multiplier = 1;
+        SlidePositionSetter slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide"), true);
 
         waitForStart();
 
+        Gamepad oldGamepad1 = new Gamepad();
+        Gamepad newGamepad1 = new Gamepad();
+
         while(opModeIsActive()) {
-            telemetry.addData("Position", position);
-            telemetry.addData("Multiplier", multiplier);
-            telemetry.addData("Encoder Position", motor.getCurrentPosition());
-            if(!yButtonWasPressed && gamepad1.y) {
-                multiplier *= 10;
+            try {
+                oldGamepad1.copy(newGamepad1);
+                newGamepad1.copy(gamepad1);
+                sleep(10);
+            } catch (RobotCoreException e) {
+                e.printStackTrace();
             }
-            if(!aButtonWasPressed && gamepad1.a) {
-                multiplier *= 0.1;
+            if (!oldGamepad1.x && newGamepad1.x) {
+                slideSystem.decrementPosition(50);
             }
-            if(!xButtonWasPressed && gamepad1.x) {
-                position += multiplier;
-                motor.setPower(1.0);
+            if (!oldGamepad1.b && newGamepad1.b) {
+                slideSystem.incrementPosition(50);
             }
-            if(!bButtonWasPressed && gamepad1.b) {
-                position -= multiplier;
-                motor.setPower(0.5);
+            if (!oldGamepad1.a && newGamepad1.a) {
+                slideSystem.decrementPosition(500);
             }
-            yButtonWasPressed = gamepad1.y;
-            aButtonWasPressed = gamepad1.a;
-            xButtonWasPressed = gamepad1.x;
-            bButtonWasPressed = gamepad1.b;
+            if (!oldGamepad1.y && newGamepad1.y) {
+                slideSystem.incrementPosition(500);
+            }
+            telemetry.addData("Target Position", slideSystem.getTargetPosition());
+            telemetry.addData("Actual Position", slideSystem.getActualPosition());
             telemetry.update();
-            motor.setTargetPosition(position);
-            sleep(100);
         }
     }
 }
