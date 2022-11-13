@@ -122,7 +122,7 @@ public class MasterRobot extends LinearOpMode {
         if (!oldGamepad2.a && newGamepad2.a) {
             slideSystem.setPosition(SlidePositions.GROUND.getPosition());
         }
-        slideSystem.setOffset((int) (newGamepad2.right_trigger - newGamepad2.left_trigger) * SLIDE_MAX_OFFSET);
+        slideSystem.setOffset((int) ((newGamepad2.right_trigger - newGamepad2.left_trigger) * SLIDE_MAX_OFFSET));
         telemetry.addData("Target Position", slideSystem.getTargetPosition());
         telemetry.addData("Actual Position", slideSystem.getActualPosition());
     }
