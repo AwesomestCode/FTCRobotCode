@@ -88,6 +88,8 @@ public class ReadDemo extends LinearOpMode {
 
             if(gamepad1.a) {
                 strafeStart = frontRight.getCurrentPosition();
+                leftStart = frontLeft.getCurrentPosition();
+                rightStart = rearLeft.getCurrentPosition();
             }
 
             for (LynxModule hub : allHubs) {
