@@ -132,9 +132,11 @@ public class MasterRobot extends LinearOpMode {
             intake.setPower(-1.0);
         } else if (intakeGamepad.dpad_down) {
             intake.setPower(1.0);
-        } else {
-            intake.setPower(0.0);
-        }
+        } else if (intakeGamepad.dpad_left){
+            intake.setPower(-0.07);   
+        }else if (intakeGmaepad.dpad_right){
+            intake.setPower(0);
+        }    
     }
 
     private void handleDrive(Gamepad driveGamepad) {
