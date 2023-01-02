@@ -13,7 +13,7 @@ public class MotorPositionDemo extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // int multiplier = 1;
-        SlidePositionSetter slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide"), true);
+        SlidePositionSetter slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide1"), hardwareMap.get(DcMotorEx.class, "linearSlide2"), 20, true);
 
         waitForStart();
 

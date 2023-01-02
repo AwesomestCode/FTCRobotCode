@@ -36,12 +36,14 @@ public class MasterRobot extends LinearOpMode {
 
     IsGitEnabled isGitEnabled;
 
-    public static double POWER_ADJUSTMENT = 0.5;
-    public static double MOVEMENT_ADJUSTMENT = 0.8;
+    public static double POWER_ADJUSTMENT = 0.4;
+    public static double MOVEMENT_ADJUSTMENT = 0.2;
     public static int SLIDE_MAX_OFFSET = 500;
+    public static double DEFAULT_INTAKE_POWER = 0.067;
     public static boolean FIELD_CENTRIC = false;
     public static boolean DUAL_CONTROLLER = true;
     public static double DRIVE_MODIFIER_EXPONENT = 2;
+    public static double MAX_SLIDE_MOTOR_AMP = 4;
 
     BNO055IMU imu;
 
@@ -54,7 +56,7 @@ public class MasterRobot extends LinearOpMode {
         rearLeft = (DcMotorEx) hardwareMap.dcMotor.get("rearLeft");
         rearRight = (DcMotorEx) hardwareMap.dcMotor.get("rearRight");
         mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
-        slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide"), true);
+        slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide1"), hardwareMap.get(DcMotorEx.class, "linearSlide2"), MAX_SLIDE_MOTOR_AMP, true);
         intake = (CRServoImplEx) hardwareMap.get(CRServo.class, "intake");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -68,6 +70,12 @@ public class MasterRobot extends LinearOpMode {
         Gamepad newGamepad1 = new Gamepad();
         Gamepad oldGamepad2 = new Gamepad();
         Gamepad newGamepad2 = new Gamepad();
+
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
 
         while(opModeIsActive()) {
             try {
@@ -95,10 +103,13 @@ public class MasterRobot extends LinearOpMode {
                 blinkColor(0xff0000);
             }
 
-            List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+            if(slideSystem.getAreMotorsOverCurrent()) {
+                telemetry.speak("Please let my slide take a break, it's aching.");
+                gamepad2.rumble(1, 1, 500);
+                telemetry.addLine("Slides are over current");
+            }
 
             for (LynxModule hub : allHubs) {
-                hub.setBulkCachingMode(LynxModule.BulkCachingMode.OFF);
                 telemetry.addData(hub.getDeviceName() + " Input Voltage", hub.getInputVoltage(VoltageUnit.VOLTS));
                 telemetry.addData(hub.getDeviceName() + " Current", hub.getCurrent(CurrentUnit.AMPS));
             }
@@ -110,7 +121,7 @@ public class MasterRobot extends LinearOpMode {
     }
     private void handleSlide(Gamepad oldGamepad2, Gamepad newGamepad2) {
         slideSystem.setSpeed(POWER_ADJUSTMENT);
-        if (!oldGamepad2.x && newGamepad2.y) {
+        if (!oldGamepad2.y && newGamepad2.y) {
             slideSystem.setPosition(SlidePositions.TOP.getPosition());
         }
         if (!oldGamepad2.x && newGamepad2.x) {
@@ -124,7 +135,8 @@ public class MasterRobot extends LinearOpMode {
         }
         slideSystem.setOffset((int) ((newGamepad2.right_trigger - newGamepad2.left_trigger) * SLIDE_MAX_OFFSET));
         telemetry.addData("Target Position", slideSystem.getTargetPosition());
-        telemetry.addData("Actual Position", slideSystem.getActualPosition());
+        telemetry.addData("Slide 1 Actual Position", slideSystem.getActualSlideMotor1Position());
+        telemetry.addData("Slide 2 Actual Position", slideSystem.getActualSlideMotor2Position());
     }
 
     private void handleIntake(Gamepad intakeGamepad) {
@@ -133,7 +145,7 @@ public class MasterRobot extends LinearOpMode {
         } else if (intakeGamepad.dpad_down) {
             intake.setPower(1.0);
         } else {
-            intake.setPower(0.0);
+            intake.setPower(DEFAULT_INTAKE_POWER);
         }
     }
 
