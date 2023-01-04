@@ -80,6 +80,14 @@ public class SlidePositionSetter {
         return slide1.isOverCurrent() || slide2.isOverCurrent();
     }
 
+    public double getMotor1Current() {
+        return slide1.getCurrent(CurrentUnit.AMPS);
+    }
+
+    public double getMotor2Current() {
+        return slide2.getCurrent(CurrentUnit.AMPS);
+    }
+
     public int setPosition(int position) {
         this.position = position;
         updatePosition();

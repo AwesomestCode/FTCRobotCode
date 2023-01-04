@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode;
 import androidx.annotation.ColorInt;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.*;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrivetrainMixer;
@@ -50,6 +52,8 @@ public class MasterRobot extends LinearOpMode {
     double initialHeading;
     @Override
     public void runOpMode() throws InterruptedException {
+        Telemetry hubTelemetry = this.telemetry;
+        MultipleTelemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         frontLeft = (DcMotorEx) hardwareMap.dcMotor.get("frontLeft");
         frontRight = (DcMotorEx) hardwareMap.dcMotor.get("frontRight");
@@ -104,7 +108,7 @@ public class MasterRobot extends LinearOpMode {
             }
 
             if(slideSystem.getAreMotorsOverCurrent()) {
-                telemetry.speak("Please let my slide take a break, it's aching.");
+                hubTelemetry.speak("Please let my slide take a break, it's aching.");
                 gamepad2.rumble(1, 1, 500);
                 telemetry.addLine("Slides are over current");
             }
@@ -114,7 +118,8 @@ public class MasterRobot extends LinearOpMode {
                 telemetry.addData(hub.getDeviceName() + " Current", hub.getCurrent(CurrentUnit.AMPS));
             }
 
-            telemetry.addData("Strafing Deadwheel", frontLeft.getCurrentPosition()); //encoder is plugged into the port of frontLeft
+            telemetry.addData("Slide 1 Current", slideSystem.getMotor1Current());
+            telemetry.addData("Slide 2 Current", slideSystem.getMotor2Current());
 
             telemetry.update();
         }
