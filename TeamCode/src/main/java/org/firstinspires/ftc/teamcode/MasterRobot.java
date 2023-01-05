@@ -97,25 +97,26 @@ public class MasterRobot extends LinearOpMode {
             handleSlide(DUAL_CONTROLLER ? oldGamepad2 : oldGamepad1, DUAL_CONTROLLER ? newGamepad2 : newGamepad1);
             handleIntake(DUAL_CONTROLLER ? newGamepad2 : newGamepad1);
 
-            if(gamepad1.left_stick_button && gamepad1.right_bumper) { //reset initial heading for recalibrating
+            if (gamepad1.left_stick_button && gamepad1.right_bumper) { //reset initial heading for recalibrating
                 initialHeading = -imu.getAngularOrientation().firstAngle;
                 blinkColor(0x00f0d4);
             }
 
-            if(gamepad2.left_stick_button && gamepad2.right_stick_button) { //reset zero position for slide motor
+            if (gamepad2.left_stick_button && gamepad2.right_stick_button) { //reset zero position for slide motor
                 slideSystem.reset();
                 blinkColor(0xff0000);
             }
 
-            if(slideSystem.getAreMotorsOverCurrent()) {
+            if (slideSystem.getAreMotorsOverCurrent()) {
                 hubTelemetry.speak("Please let my slide take a break, it's aching.");
                 gamepad2.rumble(1, 1, 500);
                 telemetry.addLine("Slides are over current");
             }
 
-            for (LynxModule hub : allHubs) {
-                telemetry.addData(hub.getDeviceName() + " Input Voltage", hub.getInputVoltage(VoltageUnit.VOLTS));
-                telemetry.addData(hub.getDeviceName() + " Current", hub.getCurrent(CurrentUnit.AMPS));
+            for (int i = 0; i < allHubs.size(); i++) {
+                LynxModule hub = allHubs.get(i);
+                telemetry.addData("Hub " + hub.getModuleAddress() + " Input Voltage", hub.getInputVoltage(VoltageUnit.VOLTS));
+                telemetry.addData("Hub " + hub.getModuleAddress() + " Current", hub.getCurrent(CurrentUnit.AMPS));
             }
 
             telemetry.addData("Slide 1 Current", slideSystem.getMotor1Current());
