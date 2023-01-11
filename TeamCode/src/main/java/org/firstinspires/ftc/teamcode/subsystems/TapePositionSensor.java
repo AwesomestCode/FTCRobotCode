@@ -31,10 +31,14 @@ public class TapePositionSensor {
 
     public float getPosition() {
         if(colour == TapeColour.RED) {
-            return (leftSensor.getHsvValues()[0] - rightSensor.getHsvValues()[0])/ 255.0f;
+            return (rightSensor.getHsvValues()[0] - leftSensor.getHsvValues()[0])/ 255.0f;
         } else {
             throw new UnsupportedOperationException("Blue tape not supported yet");
         }
+    }
+
+    public PIDController getPidController() {
+        return pidController;
     }
 
     public double getSuggestedPower() {
@@ -78,11 +82,17 @@ public class TapePositionSensor {
             // Calculate error
             double error = SETPOINT - input.getAsDouble();
             // Calculate integral
-            integral = this.integral + timer.nanoseconds() * error;
+            integral = this.integral + (timer.nanoseconds() * error)/Math.pow(10, 9);
             // Calculate derivative
-            derivative = (error - lastError) / timer.nanoseconds();
+            derivative = ((error - lastError) / timer.nanoseconds()) * Math.pow(10, 9);
             // Set last error
             lastError = error;
+            timer.reset();
+        }
+
+        public void resetPIDState() {
+            derivative = 0;
+            integral = 0;
             timer.reset();
         }
 

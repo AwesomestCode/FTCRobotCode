@@ -32,6 +32,11 @@ public class AlignmentDemo extends LinearOpMode {
             } else {
                 telemetry.addData("Touchpad", "Not Pressed");
                 mixer.setMovement(0, 0,0);
+                sensor.getPidController().resetPIDState();
+            }
+
+            if(gamepad1.right_bumper) {
+                sensor.getPidController().resetPIDState();
             }
 
             telemetry.update();
