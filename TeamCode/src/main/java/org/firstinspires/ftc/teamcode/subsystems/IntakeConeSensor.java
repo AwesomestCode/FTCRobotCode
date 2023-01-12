@@ -6,7 +6,7 @@ public class IntakeConeSensor {
     private ColourSensor sensor;
 
     public IntakeConeSensor(HardwareMap map) {
-        sensor = new ColourSensor(map, "intakeSensor");
+        sensor = new ColourSensor(map, "intakeSensor", 20);
     }
 
     private boolean hasCone() {

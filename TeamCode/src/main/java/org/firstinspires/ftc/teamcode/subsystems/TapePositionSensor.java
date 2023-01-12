@@ -9,9 +9,19 @@ import java.util.function.DoubleSupplier;
 
 @Config
 public class TapePositionSensor {
-    public static double kp = 0.5;
-    public static double ki = 0;
-    public static double kd = 0;
+    public static double red_kp = 0.3;
+    public static double red_ki = 0.20;
+    public static double red_kd = 0.007;
+
+    public static double blue_kp = 0.1;
+    public static double blue_ki = 0.2;
+    public static double blue_kd = 0.007;
+
+    private static double kp;
+    private static double ki;
+    private static double kd;
+    public static double BLUE_HUE = 210.0;
+    public static double BLUE_GAIN = 50;
     public enum TapeColour {
         RED,
         BLUE
@@ -23,17 +33,48 @@ public class TapePositionSensor {
     private PIDController pidController;
 
     public TapePositionSensor(HardwareMap map, TapeColour colour) {
-        leftSensor = new ColourSensor(map, "cs0");
-        rightSensor = new ColourSensor(map, "cs1");
+        leftSensor = new ColourSensor(map, "cs0", colour == TapeColour.RED ? 20 : 40);
+        rightSensor = new ColourSensor(map, "cs1", colour == TapeColour.RED ? 20 : 40);
+        if(colour == TapeColour.RED) {
+            kp = red_kp;
+            ki = red_ki;
+            kd = red_kd;
+        } else {
+            kp = blue_kp;
+            ki = blue_ki;
+            kd = blue_kd;
+        }
         this.colour = colour;
         pidController = new PIDController(this::getPosition);
     }
 
-    public float getPosition() {
+    public double getPosition() {
+
         if(colour == TapeColour.RED) {
             return (rightSensor.getHsvValues()[0] - leftSensor.getHsvValues()[0])/ 255.0f;
         } else {
-            throw new UnsupportedOperationException("Blue tape not supported yet");
+            return (((rightSensor.getHsvValues()[0] + 360 - BLUE_HUE) % 360) - ((leftSensor.getHsvValues()[0] + 360 - BLUE_HUE) % 360))/ 255.0f;
+        }
+    }
+
+    public void setColour(TapeColour colour) {
+        this.colour = colour;
+        if(colour == TapeColour.BLUE) {
+            leftSensor.setGain((float) BLUE_GAIN);
+            rightSensor.setGain((float) BLUE_GAIN);
+            // set pid
+            kp = blue_kp;
+            ki = blue_ki;
+            kd = blue_kd;
+        } else if(colour == TapeColour.RED) {
+            leftSensor.setGain(20);
+            rightSensor.setGain(20);
+            // set pid
+            kp = red_kp;
+            ki = red_ki;
+            kd = red_kd;
+        } else {
+            throw new IllegalArgumentException("Invalid colour");
         }
     }
 

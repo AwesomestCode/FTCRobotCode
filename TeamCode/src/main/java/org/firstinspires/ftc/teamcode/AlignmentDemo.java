@@ -35,6 +35,14 @@ public class AlignmentDemo extends LinearOpMode {
                 sensor.getPidController().resetPIDState();
             }
 
+            if(gamepad1.circle) {
+                sensor.setColour(TapePositionSensor.TapeColour.RED);
+            }
+
+            if(gamepad1.cross) {
+                sensor.setColour(TapePositionSensor.TapeColour.BLUE);
+            }
+
             if(gamepad1.right_bumper) {
                 sensor.getPidController().resetPIDState();
             }

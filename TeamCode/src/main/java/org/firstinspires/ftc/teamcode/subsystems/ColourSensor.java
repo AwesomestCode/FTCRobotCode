@@ -20,12 +20,10 @@ class ColourSensor {
     NormalizedColorSensor colorSensor;
     HardwareMap hardwareMap;
 
-    public static float GAIN = 20;
-
-    public ColourSensor(HardwareMap hardwareMap, String name) {
+    public ColourSensor(HardwareMap hardwareMap, String name, float gain) {
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, name);
         this.hardwareMap = hardwareMap;
-        colorSensor.setGain(GAIN);
+        colorSensor.setGain(gain);
     }
 
     /*public void initialise(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -44,7 +42,11 @@ class ColourSensor {
     }
 
     public float getGain() {
-        return GAIN;
+        return colorSensor.getGain();
+    }
+
+    public void setGain(float gain) {
+        colorSensor.setGain(gain) ;
     }
 
     private final float[] rgbValues = new float[3];
