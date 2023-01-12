@@ -26,7 +26,7 @@ public class ConeDepositDemo extends LinearOpMode {
 
         telemetry.speak("Stand back drivers. I have commenced the demo.");
 
-        SlidePositionSetter slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide1"), hardwareMap.get(DcMotorEx.class, "linearSlide2"), 20, true);
+        SlidePositionSetter slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide1"), hardwareMap.get(DcMotorEx.class, "linearSlide2"), 20, false);
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
