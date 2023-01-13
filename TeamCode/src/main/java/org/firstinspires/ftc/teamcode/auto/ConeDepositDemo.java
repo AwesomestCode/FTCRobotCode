@@ -10,16 +10,24 @@ import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.subsystems.JunctionPositionSensor;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositionSetter;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositions;
 
 @Autonomous(group="Demos")
 public class ConeDepositDemo extends LinearOpMode {
+    SampleMecanumDrive drive;
+
+    public void rotate(double rotation) {
+        drive.setWeightedDrivePower(new Pose2d(0, 0, rotation));
+    }
+
     static int ZONE = 3;
     @Override
     public void runOpMode() throws InterruptedException {
 
         telemetry.speak("Initialising. Please load cones");
+        JunctionPositionSensor sensor = new JunctionPositionSensor(hardwareMap);
         CRServoImplEx intake = (CRServoImplEx) hardwareMap.get(CRServo.class, "intake");
 
         waitForStart();
@@ -29,6 +37,8 @@ public class ConeDepositDemo extends LinearOpMode {
         SlidePositionSetter slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide1"), hardwareMap.get(DcMotorEx.class, "linearSlide2"), 20, false);
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+
+        this.drive = drive;
 
         // We want to start the bot at x: 10, y: -8, heading: 90 degree
         Pose2d startPose = new Pose2d(36, -62.5, Math.toRadians(90));
@@ -88,6 +98,7 @@ public class ConeDepositDemo extends LinearOpMode {
         drive.followTrajectorySequence(getToJunction);
         slideSystem.setPosition(SlidePositions.TOP.getPosition() - 600);
         sleep(500);
+        sensor.align(this::rotate);
         intake.setPower(-0.3);
         sleep(1000);
         drive.followTrajectorySequence(returnToOrigin);

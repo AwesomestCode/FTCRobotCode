@@ -4,5 +4,5 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class AutoConstants {
-    public static double FIRST_JUNCTION_ROT = 134;
+    public static double FIRST_JUNCTION_ROT = 135;
 }

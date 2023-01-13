@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.util.Timer;
+import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
 public class JunctionPositionSensor {
@@ -43,6 +44,14 @@ public class JunctionPositionSensor {
         } else {
             return 1;
         }
+    }
+
+    public void align(DoubleConsumer rotater) {
+        int estimate;
+        do {
+            estimate = getEstimate();
+            rotater.accept(estimate * 0.4);
+        } while (estimate != 0);
     }
 
     /*public static class PIDController {
