@@ -4,7 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import org.firstinspires.ftc.teamcode.libauto.DetectAprilTagZoneUtil;
+import org.firstinspires.ftc.teamcode.auto.DetectAprilTagZoneUtil;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrivetrainMixer;
 
 @Autonomous

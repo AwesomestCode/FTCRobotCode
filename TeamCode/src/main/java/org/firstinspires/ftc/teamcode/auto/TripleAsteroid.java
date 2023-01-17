@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.libauto.DetectAprilTagZoneUtil;
+import org.firstinspires.ftc.teamcode.auto.DetectAprilTagZoneUtil;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrivetrainMixer;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositions;
 

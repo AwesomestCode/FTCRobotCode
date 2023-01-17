@@ -79,7 +79,7 @@ public class ConeDepositDemo extends LinearOpMode {
                 .waitSeconds(0.5)
                 .build();
 
-        ZONE = org.firstinspires.ftc.teamcode.libauto.DetectAprilTagZoneUtil.getZone(hardwareMap, telemetry);
+        ZONE = org.firstinspires.ftc.teamcode.auto.DetectAprilTagZoneUtil.getZone(hardwareMap, telemetry);
 
         telemetry.speak("I have detected the zone as " + ZONE);
 
@@ -96,9 +96,10 @@ public class ConeDepositDemo extends LinearOpMode {
         intake.setPower(0.3);
         slideSystem.setPosition(SlidePositions.TOP.getPosition());
         drive.followTrajectorySequence(getToJunction);
-        slideSystem.setPosition(SlidePositions.TOP.getPosition() - 600);
-        sleep(500);
         sensor.align(this::rotate);
+        telemetry.speak("Finished re-aligning");
+        slideSystem.setPosition(SlidePositions.TOP.getPosition() - 200);
+        sleep(250);
         intake.setPower(-0.3);
         sleep(1000);
         drive.followTrajectorySequence(returnToOrigin);

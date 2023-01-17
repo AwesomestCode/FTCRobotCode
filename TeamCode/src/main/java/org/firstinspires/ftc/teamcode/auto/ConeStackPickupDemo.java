@@ -60,7 +60,7 @@ public class ConeStackPickupDemo extends LinearOpMode {
                 .waitSeconds(0.5)
                 .build();
 
-        ZONE = org.firstinspires.ftc.teamcode.libauto.DetectAprilTagZoneUtil.getZone(hardwareMap, telemetry);
+        ZONE = org.firstinspires.ftc.teamcode.auto.DetectAprilTagZoneUtil.getZone(hardwareMap, telemetry);
 
         telemetry.speak("I have detected the zone as " + ZONE);
 

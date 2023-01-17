@@ -50,7 +50,7 @@ public class JunctionPositionSensor {
         int estimate;
         do {
             estimate = getEstimate();
-            rotater.accept(estimate * 0.4);
+            rotater.accept(-estimate * 0.4);
         } while (estimate != 0);
     }
 

@@ -4,9 +4,9 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public enum SlidePositions {
-    TOP(4200),
-    MEDIUM(2800),
-    LOW(1500),
+    TOP(2800),
+    MEDIUM(2000),
+    LOW(1200),
     GROUND(0)
     ;
 

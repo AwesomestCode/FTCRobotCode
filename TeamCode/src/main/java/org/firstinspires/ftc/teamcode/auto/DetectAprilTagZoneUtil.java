@@ -1,5 +1,5 @@
 
-package org.firstinspires.ftc.teamcode.libauto;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.HardwareMap;
