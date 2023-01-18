@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
@@ -62,9 +63,11 @@ public class MecanumDrivetrainMixer {
 
     public void setMovement(double x, double y, double rotation) {
         if(SHIM_AUTO) {
+            mecanumDrive.setWeightedDrivePower(new Pose2d(x, y, rotation));
 
+        } else {
+            setMovement(x, y, rotation, 0);
         }
-        setMovement(x, y, rotation, 0);
     }
 
     private static class Vector2d {
