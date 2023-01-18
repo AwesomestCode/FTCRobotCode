@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Timer;
+import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
 @Config
@@ -84,6 +85,14 @@ public class TapePositionSensor {
 
     public double getSuggestedPower() {
         return pidController.getOutput();
+    }
+
+    public void align(DoubleConsumer strafer) {
+        /*int estimate;
+        do {
+            estimate = pidController.getOutput();
+            strafer.accept(-estimate * 0.4);
+        } while (estimate != 0);*/
     }
 
     public static class PIDController {

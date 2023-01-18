@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
 @TeleOp(group = "drive")
-public class BrStartTest extends LinearOpMode {
+public class LocalisationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         MultipleTelemetry telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), this.telemetry);
@@ -26,7 +26,7 @@ public class BrStartTest extends LinearOpMode {
 
         waitForStart();
 
-        drive.setPoseEstimate(new Pose2d(-60, -36, 0));
+        drive.setPoseEstimate(new Pose2d(0, 0, 0));
 
         while (!isStopRequested()) {
             drive.setWeightedDrivePower(
