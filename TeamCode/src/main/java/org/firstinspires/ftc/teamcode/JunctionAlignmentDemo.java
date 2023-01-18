@@ -13,12 +13,7 @@ public class JunctionAlignmentDemo extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         JunctionPositionSensor sensor = new JunctionPositionSensor(hardwareMap);
 
-        DcMotorEx frontLeft = (DcMotorEx) hardwareMap.dcMotor.get("frontLeft");
-        DcMotorEx frontRight = (DcMotorEx) hardwareMap.dcMotor.get("frontRight");
-        DcMotorEx rearLeft = (DcMotorEx) hardwareMap.dcMotor.get("rearLeft");
-        DcMotorEx rearRight = (DcMotorEx) hardwareMap.dcMotor.get("rearRight");
-
-        MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
+        MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(hardwareMap);
 
         waitForStart();
 

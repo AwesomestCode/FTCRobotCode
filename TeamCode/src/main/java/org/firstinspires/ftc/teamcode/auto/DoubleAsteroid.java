@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -25,7 +25,7 @@ public class DoubleAsteroid extends LinearOpMode {
         DcMotorEx rearRight = (DcMotorEx) hardwareMap.dcMotor.get("rearRight");
         DcMotorEx rightEncoder = rearRight;
 
-        MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
+        MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(hardwareMap);
 
         waitForStart();
 

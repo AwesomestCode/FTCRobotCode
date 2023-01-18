@@ -27,7 +27,7 @@ public class MecanumDrivetrainDemo extends LinearOpMode {
         DcMotorEx rearLeft = (DcMotorEx) hardwareMap.dcMotor.get("rearLeft");
         DcMotorEx rearRight = (DcMotorEx) hardwareMap.dcMotor.get("rearRight");
 
-        MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
+        MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(hardwareMap);
 
         waitForStart();
 

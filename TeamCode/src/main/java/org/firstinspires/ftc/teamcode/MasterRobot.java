@@ -59,7 +59,7 @@ public class MasterRobot extends LinearOpMode {
         frontRight = (DcMotorEx) hardwareMap.dcMotor.get("frontRight");
         rearLeft = (DcMotorEx) hardwareMap.dcMotor.get("rearLeft");
         rearRight = (DcMotorEx) hardwareMap.dcMotor.get("rearRight");
-        mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
+        mixer = new MecanumDrivetrainMixer(hardwareMap);
         slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide1"), hardwareMap.get(DcMotorEx.class, "linearSlide2"), MAX_SLIDE_MOTOR_AMP, false);
         intake = (CRServoImplEx) hardwareMap.get(CRServo.class, "intake");
 

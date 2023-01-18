@@ -1,8 +1,14 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
 
+@Config
 public class MecanumDrivetrainMixer {
+
+    public static boolean SHIM_AUTO = false;
     private final DcMotorEx frontLeft;
     private final DcMotorEx frontRight;
     private final DcMotorEx backLeft;
@@ -12,19 +18,26 @@ public class MecanumDrivetrainMixer {
     private double rearLeftPower = 0;
     private double rearRightPower = 0;
 
-    public MecanumDrivetrainMixer(DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight) {
-        this.frontLeft = frontLeft;
-        this.frontRight = frontRight;
-        this.backLeft = backLeft;
-        this.backRight = backRight;
+    SampleMecanumDrive mecanumDrive;
+
+    public MecanumDrivetrainMixer(HardwareMap map) {
+        frontLeft = (DcMotorEx) map.dcMotor.get("frontLeft");
+        frontRight = (DcMotorEx) map.dcMotor.get("frontRight");
+        backLeft = (DcMotorEx) map.dcMotor.get("rearLeft");
+        backRight = (DcMotorEx) map.dcMotor.get("rearRight");
 
         frontLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
-        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        backLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        if(!SHIM_AUTO) { // only do this when we're not relying on autonomous, otherwise that handles it for us.
+
+            frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
+            backLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        } else {
+            mecanumDrive = new SampleMecanumDrive(map);
+        }
     }
 
     private void updatePowers() {
@@ -48,6 +61,9 @@ public class MecanumDrivetrainMixer {
     }
 
     public void setMovement(double x, double y, double rotation) {
+        if(SHIM_AUTO) {
+
+        }
         setMovement(x, y, rotation, 0);
     }
 

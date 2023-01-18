@@ -10,12 +10,8 @@ import org.firstinspires.ftc.teamcode.subsystems.TapePositionSensor;
 public class AlignmentDemo extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        DcMotorEx frontLeft = (DcMotorEx) hardwareMap.dcMotor.get("frontLeft");
-        DcMotorEx frontRight = (DcMotorEx) hardwareMap.dcMotor.get("frontRight");
-        DcMotorEx rearLeft = (DcMotorEx) hardwareMap.dcMotor.get("rearLeft");
-        DcMotorEx rearRight = (DcMotorEx) hardwareMap.dcMotor.get("rearRight");
 
-        MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(frontLeft, frontRight, rearLeft, rearRight);
+        MecanumDrivetrainMixer mixer = new MecanumDrivetrainMixer(hardwareMap);
 
         TapePositionSensor sensor = new TapePositionSensor(hardwareMap, TapePositionSensor.TapeColour.RED);
         waitForStart();
