@@ -63,7 +63,7 @@ public class MecanumDrivetrainMixer {
 
     public void setMovement(double x, double y, double rotation) {
         if(SHIM_AUTO) {
-            mecanumDrive.setWeightedDrivePower(new Pose2d(x, y, rotation));
+            mecanumDrive.setWeightedDrivePower(new Pose2d(y, -x, -rotation));
 
         } else {
             setMovement(x, y, rotation, 0);
