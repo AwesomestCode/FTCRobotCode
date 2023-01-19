@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import java.util.Arrays;
 
 @Config
+public
 class ColourSensor {
 
     /** The colorSensor field will contain a reference to our color sensor hardware object */

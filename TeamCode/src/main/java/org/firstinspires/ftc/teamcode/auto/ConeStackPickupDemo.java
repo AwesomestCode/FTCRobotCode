@@ -11,12 +11,15 @@ import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositionSetter;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositions;
+import org.firstinspires.ftc.teamcode.subsystems.TapePositionSensor;
 
 @Autonomous(group="Demos")
 public class ConeStackPickupDemo extends LinearOpMode {
     static int ZONE = 3;
     @Override
     public void runOpMode() throws InterruptedException {
+
+        TapePositionSensor tapeSensor = new TapePositionSensor(hardwareMap, TapePositionSensor.TapeColour.RED);
 
         telemetry.speak("Initialising. Please load cones");
         CRServoImplEx intake = (CRServoImplEx) hardwareMap.get(CRServo.class, "intake");
@@ -86,6 +89,11 @@ public class ConeStackPickupDemo extends LinearOpMode {
         sleep(1000);
         //drive.followTrajectorySequence(returnToOrigin);
         drive.followTrajectorySequence(goToStack1);
+        if(tapeSensor.align((double strafeAmount) -> drive.setWeightedDrivePower(new Pose2d(0, strafeAmount, 0)), telemetry)) {
+            telemetry.speak("Aligned successfully");
+        } else {
+            telemetry.speak("Failed to align");
+        }
         slideSystem.setPosition(600);
         intake.setPower(0.5);
         sleep(2000);

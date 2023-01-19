@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.auto;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -14,10 +12,11 @@ import org.firstinspires.ftc.teamcode.auto.trajectorysequence.TrajectorySequence
 import org.firstinspires.ftc.teamcode.subsystems.JunctionPositionSensor;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositionSetter;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositions;
-import org.firstinspires.ftc.teamcode.subsystems.TapePositionSensor;
 
 @Autonomous(group="Demos")
-public class ConeStackDepoDemo extends LinearOpMode {
+public class LeftDepoDemo extends LinearOpMode {
+
+    boolean RIGHT_SIDE = false;
     SampleMecanumDrive drive;
 
     public void rotate(double rotation) {
@@ -27,10 +26,6 @@ public class ConeStackDepoDemo extends LinearOpMode {
     static int ZONE = 3;
     @Override
     public void runOpMode() throws InterruptedException {
-
-        MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
-        TapePositionSensor tapeSensor = new TapePositionSensor(hardwareMap, TapePositionSensor.TapeColour.RED);
 
         telemetry.speak("Initialising. Please load cones");
         JunctionPositionSensor sensor = new JunctionPositionSensor(hardwareMap);
@@ -47,7 +42,7 @@ public class ConeStackDepoDemo extends LinearOpMode {
         this.drive = drive;
 
         // We want to start the bot at x: 10, y: -8, heading: 90 degree
-        Pose2d startPose = new Pose2d(36, -62.5, Math.toRadians(90));
+        Pose2d startPose = new Pose2d(-36, -62.5, Math.toRadians(90));
 
         drive.setPoseEstimate(startPose);
 
@@ -58,28 +53,29 @@ public class ConeStackDepoDemo extends LinearOpMode {
                 .build();
 
         TrajectorySequence getToJunction = drive.trajectorySequenceBuilder(clearSignal.end())
-                .splineTo(new Vector2d(12 - 9, -36 + 9), Math.toRadians(AutoConstants.FIRST_JUNCTION_ROT))
+                .splineTo(new Vector2d(RIGHT_SIDE ? (12 - 9) : -(12 - 9), -36 + 9), Math.toRadians(180 - AutoConstants.FIRST_JUNCTION_ROT))
                 .waitSeconds(0.5)
                 .build();
 
-        TrajectorySequence goToStack1 = drive.trajectorySequenceBuilder(getToJunction.end())
-                .back(8)
-                .lineToLinearHeading(new Pose2d(16, -14, Math.toRadians(30)))
-                .splineTo(new Vector2d(60, -12), Math.toRadians(0))
-                //.lineToSplineHeading(new Pose2d(12, -30, Math.toRadians(0)))
-                //.splineTo(new Vector2d(60, -12), Math.toRadians(-90))
-                .waitSeconds(0.5)
-                .build();
-
-        TrajectorySequence goToJunction2 = drive.trajectorySequenceBuilder(goToStack1.end())
-                .lineToLinearHeading(new Pose2d(40, -12, Math.toRadians(180)))
-                .splineTo(new Vector2d(36 - 8, -12 + 8), Math.toRadians(130))
+        TrajectorySequence returnToOrigin = drive.trajectorySequenceBuilder(getToJunction.end())
+                .setReversed(true)
+                .splineTo(new Vector2d(RIGHT_SIDE ? 36 : -36, -62.5 + 22), Math.toRadians(-90))
+                .setReversed(false)
+                .forward(6)
                 .waitSeconds(0.5)
                 .build();
 
         ZONE = DetectAprilTagZoneUtil.getZone(hardwareMap, telemetry);
 
         telemetry.speak("I have detected the zone as " + ZONE);
+
+        TrajectorySequence goLeft = drive.trajectorySequenceBuilder(returnToOrigin.end())
+                .strafeLeft(24)
+                .build();
+
+        TrajectorySequence goRight = drive.trajectorySequenceBuilder(returnToOrigin.end())
+                .strafeRight(24)
+                .build();
 
         intake.setPower(0.5);
         drive.followTrajectorySequence(clearSignal);
@@ -92,30 +88,15 @@ public class ConeStackDepoDemo extends LinearOpMode {
         sleep(250);
         intake.setPower(-0.3);
         sleep(1000);
-        //drive.followTrajectorySequence(returnToOrigin);
-        intake.setPower(0);
-        slideSystem.setPosition(SlidePositions.LOW.getPosition() - 100);
-        intake.setPower(0.3);
-        drive.followTrajectorySequence(goToStack1);
-        telemetry.speak("Attempting to align");
-        while(!tapeSensor.align((double strafeAmount) -> drive.setWeightedDrivePower(new Pose2d(0, strafeAmount * 0.05, 0)), multipleTelemetry)) {
-            telemetry.speak("Failed to align");
-            drive.setWeightedDrivePower(new Pose2d(0, -0.25, 0));
-            multipleTelemetry.update();
-            //telemetry.update();
-        }
-        telemetry.speak("Aligned successfully");
-        slideSystem.setPosition(SlidePositions.LOW.getPosition() - 300);
-        sleep(250);
-        slideSystem.setPosition(SlidePositions.TOP.getPosition());
+        drive.followTrajectorySequence(returnToOrigin);
 
 
         //drive.setPoseEstimate(parkStart);
 
         if(ZONE == 1) {
-            //drive.followTrajectorySequence(goLeft);
+            drive.followTrajectorySequence(goLeft);
         } else if(ZONE == 3) {
-            //drive.followTrajectorySequence(goRight);
+            drive.followTrajectorySequence(goRight);
         }
 
         //drive.followTrajectorySequence(goToStack1);

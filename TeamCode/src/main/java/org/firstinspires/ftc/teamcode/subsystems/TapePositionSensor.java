@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.Timer;
 import java.util.function.DoubleConsumer;
@@ -23,6 +24,7 @@ public class TapePositionSensor {
     private static double kd;
     public static double BLUE_HUE = 210.0;
     public static double BLUE_GAIN = 50;
+    public static double GREY_THRESH = 50;
     public enum TapeColour {
         RED,
         BLUE
@@ -87,12 +89,27 @@ public class TapePositionSensor {
         return pidController.getOutput();
     }
 
-    public void align(DoubleConsumer strafer) {
-        /*int estimate;
+    public boolean align(DoubleConsumer strafer, Telemetry telemetry) {
+        double estimate;
+
+        telemetry.addData("Left Hue", leftSensor.getHsvValues()[0]);
+        telemetry.addData("Right Hue", rightSensor.getHsvValues()[0]);
+        telemetry.addData("Left Saturation", leftSensor.getHsvValues()[1]);
+        telemetry.addData("Right Saturation", rightSensor.getHsvValues()[1]);
+        telemetry.addData("Left Value", leftSensor.getHsvValues()[2]);
+        telemetry.addData("Right Value", rightSensor.getHsvValues()[2]);
+
+        if(leftSensor.getHsvValues()[0] > GREY_THRESH && rightSensor.getHsvValues()[0] > GREY_THRESH) {
+            return false;
+        }
         do {
-            estimate = pidController.getOutput();
-            strafer.accept(-estimate * 0.4);
-        } while (estimate != 0);*/
+            estimate = getPosition();
+            strafer.accept(getSuggestedPower());
+            telemetry.addData("Alignment Estimate", estimate);
+            //telemetry.update();
+        } while (estimate >= 0.0005);
+        telemetry.update();
+        return true;
     }
 
     public static class PIDController {
