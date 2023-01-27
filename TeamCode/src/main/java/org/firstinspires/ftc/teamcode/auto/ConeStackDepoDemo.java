@@ -63,12 +63,18 @@ public class ConeStackDepoDemo extends LinearOpMode {
                 .build();
 
         TrajectorySequence goToStack1 = drive.trajectorySequenceBuilder(getToJunction.end())
-                .back(8)
-                .lineToLinearHeading(new Pose2d(16, -14, Math.toRadians(30)))
-                .splineTo(new Vector2d(60, -12), Math.toRadians(0))
+                .setReversed(true)
+                .splineTo(new Vector2d(10, -34), Math.toRadians(-90))
+                .setReversed(false)
+                .splineTo(new Vector2d(31, -12), Math.toRadians(0))
+                .splineTo(new Vector2d(55, -12), Math.toRadians(0))
                 //.lineToSplineHeading(new Pose2d(12, -30, Math.toRadians(0)))
                 //.splineTo(new Vector2d(60, -12), Math.toRadians(-90))
                 .waitSeconds(0.5)
+                .build();
+
+        TrajectorySequence goForwardToStack = drive.trajectorySequenceBuilder(goToStack1.end())
+                .lineTo(new Vector2d(64, -12))
                 .build();
 
         TrajectorySequence goToJunction2 = drive.trajectorySequenceBuilder(goToStack1.end())
@@ -80,34 +86,109 @@ public class ConeStackDepoDemo extends LinearOpMode {
         ZONE = DetectAprilTagZoneUtil.getZone(hardwareMap, telemetry);
 
         telemetry.speak("I have detected the zone as " + ZONE);
+        telemetry.clearAll();
+        telemetry.addLine("Finished detecting zone, going to junction");
+        telemetry.update();
 
         intake.setPower(0.5);
         drive.followTrajectorySequence(clearSignal);
         intake.setPower(0.3);
         slideSystem.setPosition(SlidePositions.TOP.getPosition());
         drive.followTrajectorySequence(getToJunction);
+        telemetry.clearAll();
+        telemetry.addLine("At junction, attempting alignment");
+        telemetry.update();
         sensor.align(this::rotate);
         telemetry.speak("Finished re-aligning");
         slideSystem.setPosition(SlidePositions.TOP.getPosition() - 200);
         sleep(250);
         intake.setPower(-0.3);
         sleep(1000);
+
         //drive.followTrajectorySequence(returnToOrigin);
         intake.setPower(0);
         slideSystem.setPosition(SlidePositions.LOW.getPosition() - 100);
         intake.setPower(0.3);
+        sleep(200);
+        intake.setPower(0);
+
+        telemetry.clearAll();
+        telemetry.addLine("Deposited, going to stack");
+        telemetry.update();
+
         drive.followTrajectorySequence(goToStack1);
+
+        slideSystem.setPosition(SlidePositions.WALL.getPosition());
+
+        telemetry.clearAll();
+        telemetry.addLine("At stack, attempting to align");
+        telemetry.update();
+
         telemetry.speak("Attempting to align");
-        while(!tapeSensor.align((double strafeAmount) -> drive.setWeightedDrivePower(new Pose2d(0, strafeAmount * 0.05, 0)), multipleTelemetry)) {
-            telemetry.speak("Failed to align");
-            drive.setWeightedDrivePower(new Pose2d(0, -0.25, 0));
+        boolean spoken = false;
+
+        while(!tapeSensor.isInRange()) {
+            if(!spoken) telemetry.speak("Sensor not in range");
+            spoken = true;
+            drive.setWeightedDrivePower(new Pose2d(0, -0.4, 0));
             multipleTelemetry.update();
             //telemetry.update();
         }
+
+        telemetry.clearAll();
+        telemetry.addLine("In Range");
+        telemetry.update();
+
+        if(spoken) telemetry.speak("Now in range");
+        telemetry.speak("Already in range");
+        tapeSensor.align((double strafeAmount) -> {
+            drive.setWeightedDrivePower(new Pose2d(0, strafeAmount * -AutoConstants.TAPE_STRAFE_COEFFICIENT, 0));
+            multipleTelemetry.addData("Strafe", strafeAmount * AutoConstants.TAPE_STRAFE_COEFFICIENT);
+            multipleTelemetry.update();
+        }, multipleTelemetry);
         telemetry.speak("Aligned successfully");
-        slideSystem.setPosition(SlidePositions.LOW.getPosition() - 300);
-        sleep(250);
+
+        telemetry.clearAll();
+        telemetry.addLine("Alignment successful");
+        telemetry.update();
+
+        drive.setPoseEstimate(new Pose2d(55, -12));
+
+        sleep(500);
+
+        drive.followTrajectorySequence(goForwardToStack);
+
+        {
+
+            telemetry.speak("Attempting to align");
+            spoken = false;
+
+            while (!tapeSensor.isInRange()) {
+                if (!spoken) telemetry.speak("Sensor not in range");
+                spoken = true;
+                drive.setWeightedDrivePower(new Pose2d(0, -0.4, 0));
+                multipleTelemetry.update();
+                //telemetry.update();
+            }
+
+            telemetry.clearAll();
+            telemetry.addLine("In Range");
+            telemetry.update();
+
+            tapeSensor.align((double strafeAmount) -> {
+                drive.setWeightedDrivePower(new Pose2d(0, strafeAmount * -AutoConstants.TAPE_STRAFE_COEFFICIENT, 0));
+                multipleTelemetry.addData("Strafe", strafeAmount * AutoConstants.TAPE_STRAFE_COEFFICIENT);
+                multipleTelemetry.update();
+            }, multipleTelemetry);
+        }
+
+        telemetry.speak("Aligned successfully");
+
+        slideSystem.setPosition(SlidePositions.WALL.getPosition() - 225);
+        intake.setPower(0.3);
+        sleep(1000);
         slideSystem.setPosition(SlidePositions.TOP.getPosition());
+        sleep(10000);
 
 
         //drive.setPoseEstimate(parkStart);

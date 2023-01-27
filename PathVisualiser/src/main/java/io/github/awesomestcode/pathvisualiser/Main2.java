@@ -47,17 +47,22 @@ public class Main2 {
                 //        .build();
 
                 //TrajectorySequence goToStack1 = myBot.getDrive().trajectorySequenceBuilder(getToJunction.end())
-                .back(8)
-                .lineToLinearHeading(new Pose2d(16, -14, Math.toRadians(30)))
-                .splineTo(new Vector2d(60, -12), Math.toRadians(0))
+                //.back(9)
+                .setReversed(true)
+                .splineTo(new Vector2d(10, -34), Math.toRadians(-90))
+                .setReversed(false)
+                .splineTo(new Vector2d(31, -12), Math.toRadians(0))
+                .splineTo(new Vector2d(55, -12), Math.toRadians(0))
+                //.splineTo(new Vector2d(58, -12), Math.toRadians(180))
+                //.lineTo(new Vector2d(64, -12))
                 //.lineToSplineHeading(new Pose2d(12, -30, Math.toRadians(0)))
                 //.splineTo(new Vector2d(60, -12), Math.toRadians(-90))
                 .waitSeconds(0.5)
                 //        .build();
 
                 //TrajectorySequence goToJunction2 = myBot.getDrive().trajectorySequenceBuilder(goToStack1.end())
-                .lineToLinearHeading(new Pose2d(40, -12, Math.toRadians(180)))
-                .splineTo(new Vector2d(36 - 8, -12 + 8), Math.toRadians(130))
+                //.lineToLinearHeading(new Pose2d(40, -12, Math.toRadians(180)))
+                //.splineTo(new Vector2d(36 - 8, -12 + 8), Math.toRadians(130))
                 .waitSeconds(0.5)
                 //        .build();
 

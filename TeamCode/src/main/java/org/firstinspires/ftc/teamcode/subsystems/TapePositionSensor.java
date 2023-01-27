@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.auto.AutoConstants;
 
 import java.util.Timer;
 import java.util.function.DoubleConsumer;
@@ -12,8 +13,8 @@ import java.util.function.DoubleSupplier;
 @Config
 public class TapePositionSensor {
     public static double red_kp = 0.3;
-    public static double red_ki = 0.20;
-    public static double red_kd = 0.007;
+    public static double red_ki = 0.175;
+    public static double red_kd = 0.04;
 
     public static double blue_kp = 0.1;
     public static double blue_ki = 0.2;
@@ -99,17 +100,19 @@ public class TapePositionSensor {
         telemetry.addData("Left Value", leftSensor.getHsvValues()[2]);
         telemetry.addData("Right Value", rightSensor.getHsvValues()[2]);
 
-        if(leftSensor.getHsvValues()[0] > GREY_THRESH && rightSensor.getHsvValues()[0] > GREY_THRESH) {
-            return false;
-        }
         do {
             estimate = getPosition();
             strafer.accept(getSuggestedPower());
             telemetry.addData("Alignment Estimate", estimate);
             //telemetry.update();
-        } while (estimate >= 0.0005);
+        } while (Math.abs(estimate) >= AutoConstants.TAPE_TOLERANCE);
+        strafer.accept(0);
         telemetry.update();
         return true;
+    }
+
+    public boolean isInRange() {
+        return !(leftSensor.getHsvValues()[0] > GREY_THRESH) || !(rightSensor.getHsvValues()[0] > GREY_THRESH); // return true if either value works
     }
 
     public static class PIDController {
