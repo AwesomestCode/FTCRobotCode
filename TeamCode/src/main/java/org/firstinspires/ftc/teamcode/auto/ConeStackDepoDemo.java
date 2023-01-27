@@ -6,9 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.CRServoImplEx;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystems.JunctionPositionSensor;
@@ -27,6 +25,9 @@ public class ConeStackDepoDemo extends LinearOpMode {
     static int ZONE = 3;
     @Override
     public void runOpMode() throws InterruptedException {
+
+        DigitalChannel led0 = hardwareMap.get(DigitalChannel.class, "led0");
+        DigitalChannel led1 = hardwareMap.get(DigitalChannel.class, "led1");
 
         MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
@@ -74,14 +75,14 @@ public class ConeStackDepoDemo extends LinearOpMode {
                 .build();
 
         TrajectorySequence goForwardToStack = drive.trajectorySequenceBuilder(goToStack1.end())
-                .lineTo(new Vector2d(64, -12))
+                .lineTo(new Vector2d(68, -12))
                 .build();
 
-        TrajectorySequence goToJunction2 = drive.trajectorySequenceBuilder(goToStack1.end())
+        /*TrajectorySequence goToJunction2 = drive.trajectorySequenceBuilder(goToStack1.end())
                 .lineToLinearHeading(new Pose2d(40, -12, Math.toRadians(180)))
                 .splineTo(new Vector2d(36 - 8, -12 + 8), Math.toRadians(130))
                 .waitSeconds(0.5)
-                .build();
+                .build();*/
 
         ZONE = DetectAprilTagZoneUtil.getZone(hardwareMap, telemetry);
 
@@ -90,10 +91,14 @@ public class ConeStackDepoDemo extends LinearOpMode {
         telemetry.addLine("Finished detecting zone, going to junction");
         telemetry.update();
 
+        led0.setState(true);
+
         intake.setPower(0.5);
         drive.followTrajectorySequence(clearSignal);
         intake.setPower(0.3);
         slideSystem.setPosition(SlidePositions.TOP.getPosition());
+        led0.setState(false);
+
         drive.followTrajectorySequence(getToJunction);
         telemetry.clearAll();
         telemetry.addLine("At junction, attempting alignment");
@@ -141,14 +146,7 @@ public class ConeStackDepoDemo extends LinearOpMode {
 
         if(spoken) telemetry.speak("Now in range");
         telemetry.speak("Already in range");
-        tapeSensor.align((double strafeAmount) -> {
-            drive.setWeightedDrivePower(new Pose2d(0, strafeAmount * -AutoConstants.TAPE_STRAFE_COEFFICIENT, 0));
-            multipleTelemetry.addData("Strafe", strafeAmount * AutoConstants.TAPE_STRAFE_COEFFICIENT);
-            multipleTelemetry.update();
-        }, multipleTelemetry);
-        telemetry.speak("Aligned successfully");
-
-        telemetry.clearAll();
+        doAlignment(multipleTelemetry, tapeSensor, drive);
         telemetry.addLine("Alignment successful");
         telemetry.update();
 
@@ -158,37 +156,35 @@ public class ConeStackDepoDemo extends LinearOpMode {
 
         drive.followTrajectorySequence(goForwardToStack);
 
-        {
 
-            telemetry.speak("Attempting to align");
-            spoken = false;
+        telemetry.speak("Attempting to align");
+        spoken = false;
 
-            while (!tapeSensor.isInRange()) {
-                if (!spoken) telemetry.speak("Sensor not in range");
-                spoken = true;
-                drive.setWeightedDrivePower(new Pose2d(0, -0.4, 0));
-                multipleTelemetry.update();
-                //telemetry.update();
-            }
-
-            telemetry.clearAll();
-            telemetry.addLine("In Range");
-            telemetry.update();
-
-            tapeSensor.align((double strafeAmount) -> {
-                drive.setWeightedDrivePower(new Pose2d(0, strafeAmount * -AutoConstants.TAPE_STRAFE_COEFFICIENT, 0));
-                multipleTelemetry.addData("Strafe", strafeAmount * AutoConstants.TAPE_STRAFE_COEFFICIENT);
-                multipleTelemetry.update();
-            }, multipleTelemetry);
+        while (!tapeSensor.isInRange()) {
+            if (!spoken) telemetry.speak("Sensor not in range");
+            spoken = true;
+            drive.setWeightedDrivePower(new Pose2d(0, -0.4, 0));
+            multipleTelemetry.update();
+            //telemetry.update();
         }
 
-        telemetry.speak("Aligned successfully");
+        telemetry.clearAll();
+        telemetry.addLine("In Range");
+        telemetry.update();
+
+        doAlignment(multipleTelemetry, tapeSensor, drive);
+
+        telemetry.addLine("Trying to get to stack");
+        telemetry.update();
 
         slideSystem.setPosition(SlidePositions.WALL.getPosition() - 225);
         intake.setPower(0.3);
         sleep(1000);
         slideSystem.setPosition(SlidePositions.TOP.getPosition());
+        led1.setState(true);
         sleep(10000);
+        led1.setState(false);
+
 
 
         //drive.setPoseEstimate(parkStart);
@@ -205,5 +201,18 @@ public class ConeStackDepoDemo extends LinearOpMode {
         //drive.followTrajectorySequence(goToJunction2);
 
 
+    }
+
+    private void doAlignment(MultipleTelemetry multipleTelemetry, TapePositionSensor tapeSensor, SampleMecanumDrive drive) {
+        tapeSensor.align((double strafeAmount) -> {
+            drive.setWeightedDrivePower(new Pose2d(0, strafeAmount * -AutoConstants.TAPE_STRAFE_COEFFICIENT, 0));
+            multipleTelemetry.addData("Strafe", strafeAmount * AutoConstants.TAPE_STRAFE_COEFFICIENT);
+            multipleTelemetry.update();
+        }, multipleTelemetry);
+
+        telemetry.speak("Aligned successfully");
+
+
+        telemetry.clearAll();
     }
 }

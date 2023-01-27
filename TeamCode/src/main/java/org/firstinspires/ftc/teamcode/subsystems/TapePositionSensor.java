@@ -104,6 +104,7 @@ public class TapePositionSensor {
             estimate = getPosition();
             strafer.accept(getSuggestedPower());
             telemetry.addData("Alignment Estimate", estimate);
+            telemetry.addData("Tolerance", AutoConstants.TAPE_TOLERANCE);
             //telemetry.update();
         } while (Math.abs(estimate) >= AutoConstants.TAPE_TOLERANCE);
         strafer.accept(0);
