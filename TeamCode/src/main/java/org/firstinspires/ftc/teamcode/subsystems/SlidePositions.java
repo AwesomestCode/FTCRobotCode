@@ -8,7 +8,7 @@ public enum SlidePositions {
     MEDIUM(2000),
     LOW(1200),
     GROUND(0),
-    WALL(650)
+    WALL(625)
     ;
 
     int position;

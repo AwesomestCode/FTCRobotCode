@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
@@ -11,6 +12,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationCon
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystems.JunctionPositionSensor;
@@ -83,8 +85,10 @@ public class ConeStackDepoDemo extends LinearOpMode {
                 .build();
 
         TrajectorySequence goToStack1 = drive.trajectorySequenceBuilder(getToJunction.end())
+                .addTemporalMarker(1, () -> slideSystem.setPosition(SlidePositions.WALL.getPosition()))
                 .setReversed(true)
-                .splineTo(new Vector2d(10, -34), Math.toRadians(-90))
+                .lineToConstantHeading(new Vector2d(12 - 3, -36 + 3))
+                .splineTo(new Vector2d(10, -36), Math.toRadians(-90))
                 .setReversed(false)
                 .splineTo(new Vector2d(31, -12), Math.toRadians(0))
                 .splineTo(new Vector2d(55, -12), Math.toRadians(0))
@@ -97,12 +101,51 @@ public class ConeStackDepoDemo extends LinearOpMode {
                 .lineTo(new Vector2d(68, -12))
                 .build();
 
+
         TrajectorySequence goToJunction2 = drive.trajectorySequenceBuilder(atConePose)
                 .back(6)
                 //.lineToSplineHeading(new Pose2d(40, -12, Math.toRadians(180)))
                 .addSpatialMarker(new Vector2d(48, -12), () -> slideSystem.setPosition(SlidePositions.TOP.getPosition()))
                 .splineToSplineHeading(new Pose2d(36 - 9, -12 + 9, Math.toRadians(135)), Math.toRadians(135))
                 .waitSeconds(0.5)
+                .build();
+
+        TrajectorySequence parkLeft = drive.trajectorySequenceBuilder(goToJunction2.end())
+                .addTemporalMarker(1, () -> slideSystem.setPosition(SlidePositions.WALL.getPosition()))
+                .setConstraints(new MinVelocityConstraint(Arrays.asList(
+                        new AngularVelocityConstraint(3.0),
+                        new MecanumVelocityConstraint(50, 14.4)
+                )), new ProfileAccelerationConstraint(45))
+                .setReversed(true)
+                .back(6)
+                .splineTo(new Vector2d(24, -14), Math.toRadians(180))
+                .lineTo(new Vector2d(12, -14))
+                .setReversed(false)
+                .resetConstraints()
+                .build();
+
+        TrajectorySequence parkCentre = drive.trajectorySequenceBuilder(goToJunction2.end())
+                .addTemporalMarker(2, () -> slideSystem.setPosition(SlidePositions.WALL.getPosition()))
+                .setConstraints(new MinVelocityConstraint(Arrays.asList(
+                        new AngularVelocityConstraint(3.0),
+                        new MecanumVelocityConstraint(50, 14.4)
+                )), new ProfileAccelerationConstraint(45))
+                .setReversed(true)
+                .splineTo(new Vector2d(36, -14), Math.toRadians(180))
+                .setReversed(false)
+                .resetConstraints()
+                .build();
+
+        TrajectorySequence parkRight = drive.trajectorySequenceBuilder(goToJunction2.end())
+                .setConstraints(new MinVelocityConstraint(Arrays.asList(
+                        new AngularVelocityConstraint(3.0),
+                        new MecanumVelocityConstraint(50, 14.4)
+                )), new ProfileAccelerationConstraint(45))
+                .setReversed(true)
+                .splineTo(new Vector2d(50, -14), Math.toRadians(180))
+                .setReversed(false)
+                .forward(10)
+                .resetConstraints()
                 .build();
 
         DetectAprilTagZoneUtil.initialise(hardwareMap, telemetry);
@@ -131,6 +174,11 @@ public class ConeStackDepoDemo extends LinearOpMode {
         telemetry.addLine("At junction, attempting alignment");
         telemetry.update();
         sensor.align(this::rotate);
+        drive.updatePoseEstimate();
+        //drive.setPoseEstimate(getToJunction.end());
+        drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate())
+                .forward(1)
+                .build());
         telemetry.speak("Finished re-aligning");
         slideSystem.setPosition(SlidePositions.TOP.getPosition() - 200);
         sleep(250);
@@ -139,7 +187,7 @@ public class ConeStackDepoDemo extends LinearOpMode {
 
         //drive.followTrajectorySequence(returnToOrigin);
         intake.setPower(0);
-        slideSystem.setPosition(SlidePositions.LOW.getPosition() - 100);
+        slideSystem.setPosition(SlidePositions.TOP.getPosition());
         intake.setPower(0.3);
         sleep(200);
         intake.setPower(0);
@@ -149,8 +197,6 @@ public class ConeStackDepoDemo extends LinearOpMode {
         telemetry.update();
 
         drive.followTrajectorySequence(goToStack1);
-
-        slideSystem.setPosition(SlidePositions.WALL.getPosition());
 
         telemetry.clearAll();
         telemetry.addLine("At stack, attempting to align");
@@ -171,8 +217,12 @@ public class ConeStackDepoDemo extends LinearOpMode {
         telemetry.addLine("In Range");
         telemetry.update();
 
-        if(spoken) telemetry.speak("Now in range");
-        telemetry.speak("Already in range");
+        if(spoken) {
+            telemetry.speak("Now in range");
+        } else {
+            telemetry.speak("Already in range");
+        }
+
         doAlignment(multipleTelemetry, tapeSensor, drive);
         telemetry.addLine("Alignment successful");
         telemetry.update();
@@ -216,11 +266,19 @@ public class ConeStackDepoDemo extends LinearOpMode {
         telemetry.addLine("At junction, attempting alignment");
         telemetry.update();
         sensor.align(this::rotate);
+
+        drive.updatePoseEstimate();
+
+        drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate())
+                .forward(2)
+                .build());
+
         telemetry.speak("Finished re-aligning");
         slideSystem.setPosition(SlidePositions.TOP.getPosition() - 200);
         sleep(250);
         intake.setPower(-0.3);
         sleep(1000);
+        slideSystem.setPosition(SlidePositions.TOP.getPosition());
 
 
 
@@ -230,9 +288,29 @@ public class ConeStackDepoDemo extends LinearOpMode {
         //drive.setPoseEstimate(parkStart);
 
         if(ZONE == 1) {
-            //drive.followTrajectorySequence(goLeft);
+            telemetry.speak("I am parking in the left zone");
+            telemetry.clearAll();
+            telemetry.addLine("Parking in left zone");
+            telemetry.update();
+            drive.followTrajectorySequence(parkLeft);
+        } else if(ZONE == 2) {
+            telemetry.speak("I am parking in the centre zone");
+            telemetry.clearAll();
+            telemetry.addLine("Parking in centre zone");
+            telemetry.update();
+            drive.followTrajectorySequence(parkCentre);
         } else if(ZONE == 3) {
-            //drive.followTrajectorySequence(goRight);
+            telemetry.speak("I am parking in the right zone");
+            telemetry.clearAll();
+            telemetry.addLine("Parking in right zone");
+            telemetry.update();
+            drive.followTrajectorySequence(parkRight);
+        } else {
+            telemetry.speak("I have failed to detect the zone, so I am parking in the centre zone");
+            telemetry.clearAll();
+            telemetry.addLine("Parking in centre zone");
+            telemetry.update();
+            drive.followTrajectorySequence(parkCentre);
         }
 
         //drive.followTrajectorySequence(goToStack1);
@@ -244,13 +322,17 @@ public class ConeStackDepoDemo extends LinearOpMode {
     }
 
     private void doAlignment(MultipleTelemetry multipleTelemetry, TapePositionSensor tapeSensor, SampleMecanumDrive drive) {
-        tapeSensor.align((double strafeAmount) -> {
+        boolean res = tapeSensor.align((double strafeAmount) -> {
             drive.setWeightedDrivePower(new Pose2d(0, strafeAmount * -AutoConstants.TAPE_STRAFE_COEFFICIENT, 0));
             multipleTelemetry.addData("Strafe", strafeAmount * AutoConstants.TAPE_STRAFE_COEFFICIENT);
             multipleTelemetry.update();
         }, multipleTelemetry);
 
-        telemetry.speak("Aligned successfully");
+        if(res) {
+            telemetry.speak("Aligned successfully");
+        } else {
+            telemetry.speak("Failed to align");
+        }
 
 
         telemetry.clearAll();

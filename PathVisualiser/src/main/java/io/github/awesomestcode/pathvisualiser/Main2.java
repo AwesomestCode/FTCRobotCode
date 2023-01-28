@@ -22,7 +22,7 @@ public class Main2 {
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(45, 25, 3.8603167394869375, Math.toRadians(60), 14.4)
+                .setConstraints(50, 35, 3.8603167394869375, Math.toRadians(60), 14.4)
                 .setStartPose(startPose)
                 .setDriveTrainType(DriveTrainType.MECANUM)
                 .setDimensions(13.5, 14.5)
@@ -33,12 +33,12 @@ public class Main2 {
                 //TrajectorySequence clearSignal = myBot.getDrive().trajectorySequenceBuilder(startPose)
                 .setConstraints(new MinVelocityConstraint(Arrays.asList(
                         new AngularVelocityConstraint(3.8603167394869375),
-                        new MecanumVelocityConstraint(55, 14.4)
-                )), new ProfileAccelerationConstraint(50))
+                        new MecanumVelocityConstraint(30, 14.4)
+                )), new ProfileAccelerationConstraint(25))
                 .forward(20 + 12)
+                .resetConstraints()
                 .back(12)
                 .forward(0.01)
-                .resetConstraints()
                 //        .build();
 
                 //TrajectorySequence getToJunction = myBot.getDrive().trajectorySequenceBuilder(clearSignal.end())
@@ -55,9 +55,11 @@ public class Main2 {
                 //        .build();
 
                 //TrajectorySequence goToStack1 = myBot.getDrive().trajectorySequenceBuilder(getToJunction.end())
-                //.back(9)
                 .setReversed(true)
-                .splineTo(new Vector2d(10, -34), Math.toRadians(-90))
+                //.lineToSplineHeading(new Pose2d(12 - 6, -36 + 6, Math.toRadians(120)))
+                //.lineToSplineHeading(new Pose2d(10, -35, Math.toRadians(90)))
+                .lineToConstantHeading(new Vector2d(12 - 3, -36 + 3))
+                .splineTo(new Vector2d(10, -36), Math.toRadians(-90))
                 .setReversed(false)
                 .splineTo(new Vector2d(31, -12), Math.toRadians(0))
                 .splineTo(new Vector2d(55, -12), Math.toRadians(0))
@@ -78,6 +80,23 @@ public class Main2 {
                 .splineToSplineHeading(new Pose2d(36 - 9, -12 + 9, Math.toRadians(135)), Math.toRadians(135))
                 .waitSeconds(0.5)
                 //        .build();
+
+                //TrajectorySequence Left Park
+                /*.setReversed(true)
+                .back(6)
+                .splineTo(new Vector2d(24, -14), Math.toRadians(180))
+                .lineTo(new Vector2d(12, -14))
+                .setReversed(false)*/
+                //TrajectorySequenceCentrePark
+                /*.setReversed(true)
+                .splineTo(new Vector2d(36, -14), Math.toRadians(180))
+                .setReversed(false)*/
+                //TrajectorySequenceRightPark
+                .setReversed(true)
+                .splineTo(new Vector2d(50, -14), Math.toRadians(180))
+                .setReversed(false)
+                .forward(10)
+
 
                 //TrajectorySequence goLeft = myBot.getDrive().trajectorySequenceBuilder(returnToOrigin.end())
                 //.strafeLeft(24)

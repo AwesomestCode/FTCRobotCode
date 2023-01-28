@@ -92,6 +92,8 @@ public class TapePositionSensor {
 
     public boolean align(DoubleConsumer strafer, Telemetry telemetry) {
         double estimate;
+        ElapsedTime timer = new ElapsedTime();
+        timer.reset();
 
         telemetry.addData("Left Hue", leftSensor.getHsvValues()[0]);
         telemetry.addData("Right Hue", rightSensor.getHsvValues()[0]);
@@ -105,6 +107,7 @@ public class TapePositionSensor {
             strafer.accept(getSuggestedPower());
             telemetry.addData("Alignment Estimate", estimate);
             telemetry.addData("Tolerance", AutoConstants.TAPE_TOLERANCE);
+            if(timer.milliseconds() >= 2000) return false;
             //telemetry.update();
         } while (Math.abs(estimate) >= AutoConstants.TAPE_TOLERANCE);
         strafer.accept(0);
