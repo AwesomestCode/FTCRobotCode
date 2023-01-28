@@ -2,11 +2,14 @@ package io.github.awesomestcode.pathvisualiser;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.constraints.*;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.DriveTrainType;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 import com.noahbres.meepmeep.roadrunner.trajectorysequence.TrajectorySequence;
+
+import java.util.Arrays;
 
 import static java.lang.Thread.sleep;
 
@@ -19,7 +22,7 @@ public class Main2 {
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(50, 50, 3.8603167394869375, Math.toRadians(60), 14.4)
+                .setConstraints(45, 25, 3.8603167394869375, Math.toRadians(60), 14.4)
                 .setStartPose(startPose)
                 .setDriveTrainType(DriveTrainType.MECANUM)
                 .setDimensions(13.5, 14.5)
@@ -28,9 +31,14 @@ public class Main2 {
 
         TrajectorySequence mainTraj = myBot.getDrive().trajectorySequenceBuilder(startPose)
                 //TrajectorySequence clearSignal = myBot.getDrive().trajectorySequenceBuilder(startPose)
+                .setConstraints(new MinVelocityConstraint(Arrays.asList(
+                        new AngularVelocityConstraint(3.8603167394869375),
+                        new MecanumVelocityConstraint(55, 14.4)
+                )), new ProfileAccelerationConstraint(50))
                 .forward(20 + 12)
                 .back(12)
                 .forward(0.01)
+                .resetConstraints()
                 //        .build();
 
                 //TrajectorySequence getToJunction = myBot.getDrive().trajectorySequenceBuilder(clearSignal.end())
@@ -60,9 +68,14 @@ public class Main2 {
                 .waitSeconds(0.5)
                 //        .build();
 
+                // TrajectorySequence goForwardToStack = drive.trajectorySequenceBuilder(goToStack1.end())
+                .lineTo(new Vector2d(68, -12))
+                //.build();
+
                 //TrajectorySequence goToJunction2 = myBot.getDrive().trajectorySequenceBuilder(goToStack1.end())
-                //.lineToLinearHeading(new Pose2d(40, -12, Math.toRadians(180)))
-                //.splineTo(new Vector2d(36 - 8, -12 + 8), Math.toRadians(130))
+                .back(6)
+                //.lineToSplineHeading(new Pose2d(40, -12, Math.toRadians(180)))
+                .splineToSplineHeading(new Pose2d(36 - 9, -12 + 9, Math.toRadians(135)), Math.toRadians(135))
                 .waitSeconds(0.5)
                 //        .build();
 

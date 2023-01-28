@@ -4,6 +4,10 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.*;
@@ -13,6 +17,8 @@ import org.firstinspires.ftc.teamcode.subsystems.JunctionPositionSensor;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositionSetter;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositions;
 import org.firstinspires.ftc.teamcode.subsystems.TapePositionSensor;
+
+import java.util.Arrays;
 
 @Autonomous(group="Demos")
 public class ConeStackDepoDemo extends LinearOpMode {
@@ -29,6 +35,12 @@ public class ConeStackDepoDemo extends LinearOpMode {
         DigitalChannel led0 = hardwareMap.get(DigitalChannel.class, "led0");
         DigitalChannel led1 = hardwareMap.get(DigitalChannel.class, "led1");
 
+        led0.setMode(DigitalChannel.Mode.OUTPUT);
+        led1.setMode(DigitalChannel.Mode.OUTPUT);
+
+        led0.setState(true);
+        led1.setState(true);
+
         MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         TapePositionSensor tapeSensor = new TapePositionSensor(hardwareMap, TapePositionSensor.TapeColour.RED);
@@ -36,10 +48,6 @@ public class ConeStackDepoDemo extends LinearOpMode {
         telemetry.speak("Initialising. Please load cones");
         JunctionPositionSensor sensor = new JunctionPositionSensor(hardwareMap);
         CRServoImplEx intake = (CRServoImplEx) hardwareMap.get(CRServo.class, "intake");
-
-        waitForStart();
-
-        telemetry.speak("Stand back drivers. I have commenced the demo.");
 
         SlidePositionSetter slideSystem = new SlidePositionSetter(hardwareMap.get(DcMotorEx.class, "linearSlide1"), hardwareMap.get(DcMotorEx.class, "linearSlide2"), 20, false);
 
@@ -52,15 +60,26 @@ public class ConeStackDepoDemo extends LinearOpMode {
 
         drive.setPoseEstimate(startPose);
 
+        Pose2d atConePose = new Pose2d(64, -12, Math.toRadians(0));
+
         TrajectorySequence clearSignal = drive.trajectorySequenceBuilder(startPose)
+                .setConstraints(new MinVelocityConstraint(Arrays.asList(
+                        new AngularVelocityConstraint(3.8603167394869375),
+                        new MecanumVelocityConstraint(30, 14.4)
+                )), new ProfileAccelerationConstraint(25))
                 .forward(20 + 12)
+                .setConstraints(new MinVelocityConstraint(Arrays.asList(
+                        new AngularVelocityConstraint(3.8603167394869375),
+                        new MecanumVelocityConstraint(50, 14.4)
+                )), new ProfileAccelerationConstraint(45))
                 .back(12)
                 .forward(0.01)
+                .resetConstraints()
                 .build();
 
         TrajectorySequence getToJunction = drive.trajectorySequenceBuilder(clearSignal.end())
                 .splineTo(new Vector2d(12 - 9, -36 + 9), Math.toRadians(AutoConstants.FIRST_JUNCTION_ROT))
-                .waitSeconds(0.5)
+                .waitSeconds(0.25)
                 .build();
 
         TrajectorySequence goToStack1 = drive.trajectorySequenceBuilder(getToJunction.end())
@@ -71,18 +90,26 @@ public class ConeStackDepoDemo extends LinearOpMode {
                 .splineTo(new Vector2d(55, -12), Math.toRadians(0))
                 //.lineToSplineHeading(new Pose2d(12, -30, Math.toRadians(0)))
                 //.splineTo(new Vector2d(60, -12), Math.toRadians(-90))
-                .waitSeconds(0.5)
+                //.waitSeconds(0.5)
                 .build();
 
         TrajectorySequence goForwardToStack = drive.trajectorySequenceBuilder(goToStack1.end())
                 .lineTo(new Vector2d(68, -12))
                 .build();
 
-        /*TrajectorySequence goToJunction2 = drive.trajectorySequenceBuilder(goToStack1.end())
-                .lineToLinearHeading(new Pose2d(40, -12, Math.toRadians(180)))
-                .splineTo(new Vector2d(36 - 8, -12 + 8), Math.toRadians(130))
+        TrajectorySequence goToJunction2 = drive.trajectorySequenceBuilder(atConePose)
+                .back(6)
+                //.lineToSplineHeading(new Pose2d(40, -12, Math.toRadians(180)))
+                .addSpatialMarker(new Vector2d(48, -12), () -> slideSystem.setPosition(SlidePositions.TOP.getPosition()))
+                .splineToSplineHeading(new Pose2d(36 - 9, -12 + 9, Math.toRadians(135)), Math.toRadians(135))
                 .waitSeconds(0.5)
-                .build();*/
+                .build();
+
+        DetectAprilTagZoneUtil.initialise(hardwareMap, telemetry);
+
+        waitForStart();
+
+        telemetry.speak("Stand back drivers. I have commenced the demo.");
 
         ZONE = DetectAprilTagZoneUtil.getZone(hardwareMap, telemetry);
 
@@ -91,13 +118,13 @@ public class ConeStackDepoDemo extends LinearOpMode {
         telemetry.addLine("Finished detecting zone, going to junction");
         telemetry.update();
 
-        led0.setState(true);
+        led0.setState(false);
 
         intake.setPower(0.5);
         drive.followTrajectorySequence(clearSignal);
         intake.setPower(0.3);
         slideSystem.setPosition(SlidePositions.TOP.getPosition());
-        led0.setState(false);
+        led0.setState(true);
 
         drive.followTrajectorySequence(getToJunction);
         telemetry.clearAll();
@@ -107,8 +134,8 @@ public class ConeStackDepoDemo extends LinearOpMode {
         telemetry.speak("Finished re-aligning");
         slideSystem.setPosition(SlidePositions.TOP.getPosition() - 200);
         sleep(250);
-        intake.setPower(-0.3);
-        sleep(1000);
+        intake.setPower(-1);
+        sleep(500);
 
         //drive.followTrajectorySequence(returnToOrigin);
         intake.setPower(0);
@@ -152,10 +179,10 @@ public class ConeStackDepoDemo extends LinearOpMode {
 
         drive.setPoseEstimate(new Pose2d(55, -12));
 
-        sleep(500);
+        telemetry.addLine("Trying to get to stack");
+        telemetry.update();
 
         drive.followTrajectorySequence(goForwardToStack);
-
 
         telemetry.speak("Attempting to align");
         spoken = false;
@@ -174,16 +201,29 @@ public class ConeStackDepoDemo extends LinearOpMode {
 
         doAlignment(multipleTelemetry, tapeSensor, drive);
 
-        telemetry.addLine("Trying to get to stack");
-        telemetry.update();
-
-        slideSystem.setPosition(SlidePositions.WALL.getPosition() - 225);
+        slideSystem.setPosition(SlidePositions.WALL.getPosition() - 250);
         intake.setPower(0.3);
-        sleep(1000);
-        slideSystem.setPosition(SlidePositions.TOP.getPosition());
-        led1.setState(true);
-        sleep(10000);
+        sleep(750);
+        slideSystem.setPosition(SlidePositions.WALL.getPosition() + 500);
         led1.setState(false);
+        sleep(250);
+        led1.setState(true);
+
+        drive.setPoseEstimate(atConePose);
+
+        drive.followTrajectorySequence(goToJunction2);
+        telemetry.clearAll();
+        telemetry.addLine("At junction, attempting alignment");
+        telemetry.update();
+        sensor.align(this::rotate);
+        telemetry.speak("Finished re-aligning");
+        slideSystem.setPosition(SlidePositions.TOP.getPosition() - 200);
+        sleep(250);
+        intake.setPower(-0.3);
+        sleep(1000);
+
+
+
 
 
 

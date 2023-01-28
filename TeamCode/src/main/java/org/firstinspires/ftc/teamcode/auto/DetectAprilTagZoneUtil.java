@@ -28,24 +28,30 @@ public class DetectAprilTagZoneUtil {
 
     private static int numFramesWithoutDetection = 0;
 
-    private static final float DECIMATION_HIGH = 2;
+    private static final float DECIMATION_HIGH = 1;
     private static final float DECIMATION_LOW = 1;
     private static final float THRESHOLD_HIGH_DECIMATION_RANGE_METERS = 1.0f;
     private static final int THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION = 4;
 
-    @SuppressWarnings("DuplicatedCode")
-    public static int getZone(HardwareMap hardwareMap, Telemetry telemetry) throws InterruptedException {
+    private static int cameraMonitorViewId;
+    private static OpenCvWebcam webcam;
+    private static FtcDashboard dashboard;
+    private static boolean initialised = false;
+
+    private static int mostRecentDetection = -1;
+    private static Thread detectionThread;
+    public static void initialise(HardwareMap hardwareMap, Telemetry telemetry) {
+        if(initialised) {
+            return;
+        }
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        FtcDashboard dashboard = FtcDashboard.getInstance();
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        dashboard = FtcDashboard.getInstance();
         dashboard.startCameraStream(webcam, 0);
 
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
 
         webcam.setPipeline(aprilTagDetectionPipeline);
-
-        telemetry.addLine("Waiting for start");
-        telemetry.update();
 
         webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
@@ -81,62 +87,87 @@ public class DetectAprilTagZoneUtil {
             }
         });
 
-        // If there's been a new frame...
-        while(true) {
-            ArrayList<AprilTagDetection> detections = aprilTagDetectionPipeline.getDetectionsUpdate();
+        telemetry.addLine("Waiting for start");
+        telemetry.update();
+        detectionThread = new Thread(() -> {
+            // If there's been a new frame...
+            while(true) {
+                ArrayList<AprilTagDetection> detections = aprilTagDetectionPipeline.getDetectionsUpdate();
 
-            /*
-             * Send some stats to the telemetry
-             */
-            telemetry.addData("Frame Count", webcam.getFrameCount());
-            telemetry.addData("FPS", String.format("%.2f", webcam.getFps()));
-            telemetry.addData("Total frame time ms", webcam.getTotalFrameTimeMs());
-            telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
-            telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
-            telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
-            if(detections != null) {
-                // If we don't see any tags
-                if (detections.size() == 0) {
-                    numFramesWithoutDetection++;
+                /*
+                 * Send some stats to the telemetry
+                 */
+                telemetry.addData("Frame Count", webcam.getFrameCount());
+                telemetry.addData("FPS", String.format("%.2f", webcam.getFps()));
+                telemetry.addData("Total frame time ms", webcam.getTotalFrameTimeMs());
+                telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
+                telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
+                telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
+                if(detections != null) {
+                    // If we don't see any tags
+                    if (detections.size() == 0) {
+                        numFramesWithoutDetection++;
 
-                    // If we haven't seen a tag for a few frames, lower the decimation
-                    // so we can hopefully pick one up if we're e.g. far back
-                    if (numFramesWithoutDetection >= THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION) {
-                        aprilTagDetectionPipeline.setDecimation(DECIMATION_LOW);
+                        // If we haven't seen a tag for a few frames, lower the decimation
+                        // so we can hopefully pick one up if we're e.g. far back
+                        if (numFramesWithoutDetection >= THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION) {
+                            aprilTagDetectionPipeline.setDecimation(DECIMATION_LOW);
+                        }
+                    }
+                    // We do see tags!
+                    else {
+                        numFramesWithoutDetection = 0;
+
+                        // If the target is within 1 meter, turn on high decimation to
+                        // increase the frame rate
+                        if (detections.get(0).pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_METERS) {
+                            aprilTagDetectionPipeline.setDecimation(DECIMATION_HIGH);
+                        }
+
+                        for (AprilTagDetection detection : detections) {
+                            telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
+                            telemetry.addLine(String.format("Translation X: %.2f metres", detection.pose.x));
+                            telemetry.addLine(String.format("Translation Y: %.2f metres", detection.pose.y));
+                            telemetry.addLine(String.format("Translation Z: %.2f metres", detection.pose.z));
+                            telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(detection.pose.yaw)));
+                            telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
+                            telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
+                            if (detection.id == 114) {
+                                mostRecentDetection = 1;
+                            }
+                            if (detection.id == 187) {
+                                mostRecentDetection = 2;
+                            }
+                            if (detection.id == 196) {
+                                mostRecentDetection = 3;
+                            }
+                        }
                     }
                 }
-                // We do see tags!
-                else {
-                    numFramesWithoutDetection = 0;
-
-                    // If the target is within 1 meter, turn on high decimation to
-                    // increase the frame rate
-                    if (detections.get(0).pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_METERS) {
-                        aprilTagDetectionPipeline.setDecimation(DECIMATION_HIGH);
-                    }
-
-                    for (AprilTagDetection detection : detections) {
-                        telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
-                        telemetry.addLine(String.format("Translation X: %.2f metres", detection.pose.x));
-                        telemetry.addLine(String.format("Translation Y: %.2f metres", detection.pose.y));
-                        telemetry.addLine(String.format("Translation Z: %.2f metres", detection.pose.z));
-                        telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(detection.pose.yaw)));
-                        telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
-                        telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
-                        if (detection.id == 114) {
-                            return 1;
-                        }
-                        if (detection.id == 187) {
-                            return 2;
-                        }
-                        if (detection.id == 196) {
-                            return 3;
-                        }
-                    }
+                telemetry.update();
+                try {
+                    sleep(250);
+                } catch (InterruptedException e) {
+                    System.err.println("Detection Interrupted");
+                    break;
                 }
             }
-            telemetry.update();
-            sleep(250);
+        });
+
+        detectionThread.start();
+
+        initialised = true;
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    public static int getZone(HardwareMap hardwareMap, Telemetry telemetry) throws InterruptedException {
+        if(!initialised) {
+            initialise(hardwareMap, telemetry);
         }
+
+        webcam.closeCameraDevice();
+        detectionThread.interrupt();
+        initialised = false;
+        return mostRecentDetection;
     }
 }
