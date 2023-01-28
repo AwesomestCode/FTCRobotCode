@@ -20,6 +20,9 @@ public class JunctionAlignmentDemo extends LinearOpMode {
         while (opModeIsActive()) {
             int estimate = sensor.getEstimate();
             telemetry.addData("Estimate", estimate);
+            telemetry.addData("Left Sensor CM", sensor.getLeftSensorRaw());
+            telemetry.addData("Centre Sensor CM", sensor.getCentreSensorRaw());
+            telemetry.addData("Right Sensor CM", sensor.getRightSensorRaw());
             if(gamepad1.touchpad) {
                 mixer.setMovement(0, 0, estimate * 0.4);
             } else {

@@ -46,6 +46,17 @@ public class JunctionPositionSensor {
         }
     }
 
+    public double getLeftSensorRaw() {
+        return leftSensor.getDistance(DistanceUnit.CM);
+    }
+
+    public double getRightSensorRaw() {
+        return rightSensor.getDistance(DistanceUnit.CM);
+    }
+
+    public double getCentreSensorRaw() {
+        return centreSensor.getDistance(DistanceUnit.CM);
+    }
     public void align(DoubleConsumer rotater) {
         int estimate;
         do {
