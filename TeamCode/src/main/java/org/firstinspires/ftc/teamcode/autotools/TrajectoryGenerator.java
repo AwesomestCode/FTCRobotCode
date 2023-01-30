@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.generators;
+package org.firstinspires.ftc.teamcode.autotools;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -41,13 +41,13 @@ public final class TrajectoryGenerator {
 
     boolean initialised;
 
-    private Pose2d startPose = new Pose2d(36, -62.5, Math.toRadians(90));
+    private final Pose2d startPose = new Pose2d(36, -62.5, Math.toRadians(90));
 
     public Pose2d getStartPose() {
         return startPose;
     }
 
-    private Pose2d atConePose = new Pose2d(64, -12, Math.toRadians(0));
+    private final Pose2d atConePose = new Pose2d(64, -12, Math.toRadians(0));
 
     private TrajectorySequence clearSignal;
 
@@ -161,12 +161,12 @@ public final class TrajectoryGenerator {
                 .lineToConstantHeading(new Vector2d(12 - 3, -36 + 3))
                 .splineTo(new Vector2d(10, -36), Math.toRadians(-90))
                 .setReversed(false)
-                .splineTo(new Vector2d(31, -12), Math.toRadians(0))
-                .splineTo(new Vector2d(55, -12), Math.toRadians(0))
+                .splineTo(new Vector2d(31, -10.5), Math.toRadians(0))
+                .splineTo(new Vector2d(55, -10.5), Math.toRadians(0))
                 .build();
 
         goForwardToStack = drive.trajectorySequenceBuilder(goToStack1.end())
-                .lineTo(new Vector2d(68, -12))
+                .lineTo(new Vector2d(68, -10.5))
                 .build();
 
         goToJunction2 = drive.trajectorySequenceBuilder(atConePose)
