@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
+import org.firstinspires.ftc.teamcode.auto.PoseData;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrivetrainMixer;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositionSetter;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositions;
@@ -40,9 +41,9 @@ public class MasterRobot extends LinearOpMode {
 
     public static double POWER_ADJUSTMENT = 0.4;
     public static double MOVEMENT_ADJUSTMENT = 0.2;
-    public static int SLIDE_MAX_OFFSET = 500;
+    public static int SLIDE_MAX_OFFSET = 300;
     public static double DEFAULT_INTAKE_POWER = 0.067;
-    public static boolean FIELD_CENTRIC = false;
+    public static boolean FIELD_CENTRIC = true;
     public static boolean DUAL_CONTROLLER = true;
     public static double DRIVE_MODIFIER_EXPONENT = 2;
     public static double MAX_SLIDE_MOTOR_AMP = 4;
@@ -66,7 +67,7 @@ public class MasterRobot extends LinearOpMode {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);
-        initialHeading = -imu.getAngularOrientation().firstAngle;
+        initialHeading = -imu.getAngularOrientation().firstAngle + PoseData.lastAngle;
 
         waitForStart();
 

@@ -4,8 +4,10 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.AutoConstants;
+import org.firstinspires.ftc.teamcode.auto.PoseData;
 import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystems.JunctionPositionSensor;
@@ -18,15 +20,17 @@ public class StepRunner {
     private static StepRunner runner;
     private Telemetry telemetry;
     private SampleMecanumDrive drive;
+    private TrajectoryGenerator.Side side;
 
     private StepRunner() {}
 
-    public static StepRunner getInstance(Telemetry telemetry, SampleMecanumDrive drive) {
+    public static StepRunner getInstance(Telemetry telemetry, SampleMecanumDrive drive, TrajectoryGenerator.Side side) {
         if (runner == null) {
             runner = new StepRunner();
         }
         runner.telemetry = telemetry;
         runner.drive = drive;
+        runner.side = side;
         return runner;
     }
 
@@ -42,7 +46,7 @@ public class StepRunner {
         drive.setWeightedDrivePower(new Pose2d(0, 0, rotation));
     }
 
-    public void parkFromJunction2(TrajectorySequence parkLeft, TrajectorySequence parkCentre, TrajectorySequence parkRight, int zone) {
+    public void parkFromJunction2(TrajectorySequence parkLeft, TrajectorySequence parkCentre, TrajectorySequence parkRight, int zone, SlidePositionSetter slideSystem) {
         if(zone == 1) {
             telemetry.speak("I am parking in the left zone");
             telemetry.clearAll();
@@ -68,6 +72,8 @@ public class StepRunner {
             telemetry.update();
             drive.followTrajectorySequence(parkCentre);
         }
+        slideSystem.setPosition(0);
+        PoseData.lastAngle = -(drive.getLocalizer().getPoseEstimate().getHeading() - 90);
     }
 
     public void goSecondJunctionFromStack(JunctionPositionSensor sensor, CRServoImplEx intake, SlidePositionSetter slideSystem, TrajectorySequence goToJunction2) {
@@ -101,13 +107,18 @@ public class StepRunner {
         telemetry.speak("Attempting to align");
         boolean spoken = false;
 
-        while(!tapeSensor.isInRange()) {
+        ElapsedTime timer = new ElapsedTime();
+        timer.reset();
+
+        while(!tapeSensor.isInRange() && timer.milliseconds() < 500) {
             if(!spoken) telemetry.speak("Sensor not in range");
             spoken = true;
-            drive.setWeightedDrivePower(new Pose2d(0, -0.4, 0));
+            drive.setWeightedDrivePower(new Pose2d(0, this.side == TrajectoryGenerator.Side.RIGHT ? -0.4 : 0.4, 0));
             multipleTelemetry.update();
             //telemetry.update();
         }
+
+        drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         telemetry.clearAll();
         telemetry.addLine("In Range");
@@ -123,7 +134,7 @@ public class StepRunner {
         telemetry.addLine("Alignment successful");
         telemetry.update();
 
-        drive.setPoseEstimate(new Pose2d(55, -12));
+        drive.setPoseEstimate(new Pose2d(this.side == TrajectoryGenerator.Side.RIGHT ? 55 : -55, -12));
 
         telemetry.addLine("Trying to get to stack");
         telemetry.update();
@@ -133,13 +144,17 @@ public class StepRunner {
         telemetry.speak("Attempting to align");
         spoken = false;
 
-        while (!tapeSensor.isInRange()) {
+        timer.reset();
+
+        while (!tapeSensor.isInRange() && timer.milliseconds() < 500) {
             if (!spoken) telemetry.speak("Sensor not in range");
             spoken = true;
-            drive.setWeightedDrivePower(new Pose2d(0, -0.4, 0));
+            drive.setWeightedDrivePower(new Pose2d(0,  this.side == TrajectoryGenerator.Side.RIGHT ? -0.4 : 0.4, 0));
             multipleTelemetry.update();
             //telemetry.update();
         }
+
+        drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         telemetry.clearAll();
         telemetry.addLine("In Range");
@@ -167,7 +182,7 @@ public class StepRunner {
         drive.updatePoseEstimate();
         //drive.setPoseEstimate(getToJunction.end());
         drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate())
-                .forward(1)
+                .forward(2)
                 .build());
         telemetry.speak("Finished re-aligning");
         slideSystem.setPosition(SlidePositions.TOP.getPosition() - 200);

@@ -2,21 +2,21 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.CRServoImplEx;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import org.firstinspires.ftc.teamcode.auto.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.auto.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.autotools.StepRunner;
 import org.firstinspires.ftc.teamcode.autotools.TrajectoryGenerator;
 import org.firstinspires.ftc.teamcode.subsystems.JunctionPositionSensor;
 import org.firstinspires.ftc.teamcode.subsystems.SlidePositionSetter;
-import org.firstinspires.ftc.teamcode.subsystems.SlidePositions;
 import org.firstinspires.ftc.teamcode.subsystems.TapePositionSensor;
 
 @Autonomous(group="Demos")
-public class ConeStackDepoDemo extends LinearOpMode {
+public class RightBlueConeStackDepoDemo extends LinearOpMode {
     SampleMecanumDrive drive;
 
     @Override
@@ -33,7 +33,7 @@ public class ConeStackDepoDemo extends LinearOpMode {
 
         MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        TapePositionSensor tapeSensor = new TapePositionSensor(hardwareMap, TapePositionSensor.TapeColour.RED);
+        TapePositionSensor tapeSensor = new TapePositionSensor(hardwareMap, TapePositionSensor.TapeColour.BLUE);
 
         telemetry.speak("Initialising. Please load cones");
         JunctionPositionSensor sensor = new JunctionPositionSensor(hardwareMap);
@@ -47,7 +47,7 @@ public class ConeStackDepoDemo extends LinearOpMode {
 
         TrajectoryGenerator trajectoryGenerator = TrajectoryGenerator.getInstance();
 
-        TrajectoryGenerator.getInstance().initialise(TrajectoryGenerator.Alliance.RED, TrajectoryGenerator.Side.RIGHT, drive, slideSystem);
+        TrajectoryGenerator.getInstance().initialise(TrajectoryGenerator.Alliance.BLUE, TrajectoryGenerator.Side.RIGHT, drive, slideSystem);
 
         drive.setPoseEstimate(TrajectoryGenerator.getInstance().getStartPose());
 

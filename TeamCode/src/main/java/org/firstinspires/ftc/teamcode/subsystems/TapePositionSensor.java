@@ -25,7 +25,8 @@ public class TapePositionSensor {
     private static double kd;
     public static double BLUE_HUE = 210.0;
     public static double BLUE_GAIN = 50;
-    public static double GREY_THRESH = 50;
+    public static double RED_GREY_THRESH = 50;
+    public static double BLUE_GREY_THRESH = 200;
     public enum TapeColour {
         RED,
         BLUE
@@ -116,7 +117,11 @@ public class TapePositionSensor {
     }
 
     public boolean isInRange() {
-        return !(leftSensor.getHsvValues()[0] > GREY_THRESH) || !(rightSensor.getHsvValues()[0] > GREY_THRESH); // return true if either value works
+        if(this.colour == TapeColour.RED) {
+            return !(leftSensor.getHsvValues()[0] > RED_GREY_THRESH) || !(rightSensor.getHsvValues()[0] > RED_GREY_THRESH); // return true if either value works
+        } else {
+            return !(leftSensor.getHsvValues()[0] < BLUE_GREY_THRESH) || !(rightSensor.getHsvValues()[0] < BLUE_GREY_THRESH);
+        }
     }
 
     public static class PIDController {
